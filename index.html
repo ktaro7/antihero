@@ -1,0 +1,1245 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>中小悪の組織 Solo v1.1</title>
+<style>
+:root{--bg:#0d0f13;--p:#171a21;--p2:#222732;--line:#3a414e;--text:#f3f4f6;--muted:#aab1bc;--red:#9b3636;--gold:#e5b85f;--green:#6ac68b;--boost:#69b7ff}*{box-sizing:border-box}body{margin:0;background:#0d0f13;color:var(--text);font-family:system-ui,-apple-system,"Yu Gothic",sans-serif}header{position:sticky;top:0;z-index:5;background:#0d0f13ee;border-bottom:1px solid var(--line);padding:10px 14px}.top{max-width:1400px;margin:auto;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}h1{font-size:19px;margin:0}.stats{display:flex;gap:7px;flex-wrap:wrap}.pill{padding:6px 9px;border-radius:999px;background:var(--p2);border:1px solid var(--line);font-weight:700;font-size:13px}.money{color:var(--green)}.vp{color:var(--gold)}main{max-width:1400px;margin:auto;padding:14px;display:grid;grid-template-columns:1.1fr .9fr;gap:14px}@media(max-width:950px){main{grid-template-columns:1fr}}.panel{background:var(--p);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:14px}.panel h2{font-size:17px;margin:0 0 9px}.sub,.small{font-size:12px;color:var(--muted);line-height:1.5}.market{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}@media(max-width:560px){.market{grid-template-columns:1fr}}.card{background:var(--p2);border:1px solid #454d5b;border-radius:11px;padding:10px;position:relative}.card h3{font-size:15px;margin:0 52px 5px 0}.price{position:absolute;right:9px;top:9px;color:var(--gold);font-weight:800}.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-size:11px;margin:2px}.desc{font-size:12px;line-height:1.45;margin-top:6px;color:#d9dde4}button,select{font:inherit}button{background:#2c323e;color:white;border:1px solid #505968;border-radius:8px;padding:7px 9px;cursor:pointer}button:hover{filter:brightness(1.12)}button.primary{background:var(--red)}button:disabled{opacity:.42;cursor:not-allowed}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.base{display:flex;flex-direction:column;gap:7px}.floor{border:1px dashed #555e6d;border-radius:10px;padding:9px;min-height:66px}.floorHead{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}.occupant{font-weight:800}.hand{display:flex;gap:6px;flex-wrap:wrap}.mini{border:1px solid var(--line);background:var(--p2);border-radius:8px;padding:6px 8px;font-size:12px}.selected{outline:2px solid #c84b4b}.log{height:260px;overflow:auto;background:#0b0d11;border:1px solid #292f39;border-radius:9px;padding:8px;font-size:12px;line-height:1.5}.log div{padding:3px 0;border-bottom:1px solid #20252e}.phase{color:#ffce73}.danger{color:#ff8989}.ok{color:#83dda2}.row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.battle{border:1px solid #744;border-radius:10px;padding:9px;background:#211719;margin-top:8px}.battle strong{color:#ffb3b3}.divider{height:1px;background:var(--line);margin:10px 0}.counter{font-weight:800}.modalBack{display:none;position:fixed;inset:0;background:#000a;z-index:20;align-items:center;justify-content:center;padding:18px}.modalBack.open{display:flex}.modal{width:min(620px,100%);max-height:85vh;overflow:auto;background:var(--p);border:1px solid var(--line);border-radius:14px;padding:16px}.modal h2{margin:0 0 10px}.detailGrid{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px}.detailGrid b{color:var(--muted)}.boost{color:var(--boost);font-weight:900}.atkline{font-weight:800}.effectBox{margin-top:8px;padding:7px;border-left:3px solid var(--boost);background:#151d27;font-size:12px;line-height:1.5}
+</style></head><body><header><div class="top"><h1>中小悪の組織 <span class="small">1人テスト版 v1.2</span></h1><div class="stats"><span class="pill money">資金 <b id="money">5</b>万</span><span class="pill vp">VP <b id="vp">0</b>%</span><span class="pill">経過ターン <b id="turnN">0</b></span><span class="pill">襲撃 <b id="raid">4</b></span><span class="pill">戦闘員 <b id="troops">2</b></span><span class="pill">手札 <b id="handN">4</b></span><span class="pill">山札 <b id="deckN">0</b>（襲撃 <b id="raidN">0</b>）</span></div></div></header><main><section>
+<div class="panel"><h2>ターン進行</h2><div id="phaseText" class="sub"></div><div class="row"><button id="drawBtn" class="primary">① 支給カードを引く</button><button id="resolveBtn">② 配置効果を処理</button><button id="hireBtn">③ 戦闘員を雇用（2万）</button><button id="refreshMarketBtn">怪人市場更新（5万・1ターン1回）</button><button id="endBtn">④ ターン終了</button></div><div class="small" style="margin-top:8px">初期手札4枚・資金5万円・戦闘員2体・最下層に首領固定。支給→上層から配置効果→処分→市場更新/購入/雇用→配置変更→終了。初回ターンは襲撃なし。勝利条件100%。</div></div>
+<div class="panel"><h2>怪人市場</h2><div id="market" class="market"></div></div>
+<div class="panel"><h2>未配置</h2><div id="reserve" class="hand"></div><div class="small" style="margin-top:7px">怪人または戦闘員を選択→空きフロアをクリック。配置変更はターン中自由（試験仕様）。</div></div>
+<div class="panel"><h2>イベント手札</h2><div id="eventHand" class="hand"></div><div class="small" style="margin-top:7px">手札カードをクリックすると使用。カードは右クリックで詳細確認できます。</div></div>
+<div class="panel"><h2>装備・罠</h2><div id="gearHand" class="hand"></div><div class="small" style="margin-top:7px">装備は配置怪人を選んで使用。罠は襲撃中に使用。右クリックでカード本文を確認できます。</div></div>
+</section><section>
+<div class="panel"><h2>基地（5フロア固定）</h2><div id="base" class="base"></div></div>
+<div class="panel"><h2>襲撃</h2><div id="battleBox" class="small">現在襲撃なし</div></div>
+<div class="panel"><h2>ログ</h2><div id="log" class="log"></div><div class="actions"><button id="resetBtn">ゲームをリセット</button></div></div>
+</section></main><div id="detailBack" class="modalBack" role="dialog" aria-modal="true"><div class="modal"><div class="row" style="justify-content:space-between"><h2 id="detailTitle">カード詳細</h2><button id="detailClose">閉じる</button></div><div id="detailBody"></div></div></div>
+<script>
+const monsters=[
+['スパイ',3,[1],4,2,'相手カード公開（ソロでは労働のみ）'],['アイドル',3,[2],4,2,'配信+6%',{vp:6}],['ビジネスマン',3,[3],3,4,'労働4万'],['トレーダー',2,[4],5,2,'労働2万＋支給カード1枚',{draw:1}],['商人',3,[5],5,3,'怪人購入-2万',{merchant:true}],['ゾンビ',3,[1,2],5,1,'敗北時、下層戦闘員をゾンビ化'],['狙撃手',2,[3,4],8,2,'対人手札妨害（ソロでは労働のみ）'],['贋作',2,[5,6],8,0,'隣接階の配置効果をコピー'],['戦闘員の隊長',1,[1,6],12,2,'上層の戦闘員を強化／戦闘員数×2%',{captain:true}],['武士',2,[4,6],8,2,'ヒーロー撤退時+10%',{victoryVp:10}],['騎士',2,[3,5],8,2,'ヒーロー撤退時+10%',{victoryVp:10}],['凡怪人',3,[2,5],7,3,'労働3万'],['不死者',2,[3,6],10,1,'配信+4%／襲撃死亡後復活',{vp:4,undead:true}],['マイティウォリアーシャドウ',2,[1,2,3,4,5,6],5,0,'戦闘後に犠牲',{shadow:true}],['インセクトアーマー ヘラクレス',1,[2,3,4],15,2,'カード・罠効果無効／ギガント無効',{hercules:true}]];
+const eventDefs=[['勝利点4%',5,'vp',4],['勝利点10%',3,'vp',10],['勝利点20%',2,'vp',20],['1万円獲得',10,'money',1],['2万円獲得',8,'money',2],['3万円獲得',5,'money',3],['5万円獲得',2,'money',5],['手札を2枚引く',3,'draw',2],['手札を3枚引く',2,'draw',3],['怪人3万円引き',5,'coupon',3],['怪人5万円引き',3,'coupon',5],['怪人半額',1,'half'],['撹乱作戦',7,'raidReset'],['鹵獲作戦',3,'salvage'],['偽装工作',2,'solo'],['妨害工作',4,'solo'],['妨害工作2',3,'solo'],['破壊工作2',3,'solo']];
+const gearDefs=[['盾1',1,'shield',1],['盾2',1,'shield',2],['盾3',1,'shield',3],['盾4',1,'shield',4],['盾5',1,'shield',5],['盾6',1,'shield',6],['自爆ベルト',3,'suicideBelt'],['剣',2,'sword'],['身代わり',2,'substitute'],['死亡保険',3,'insurance'],['ビジネス書',3,'book'],['自己啓発本',2,'selfHelp'],['煙幕',7,'trapSmoke'],['増援',3,'trapReinforce'],['自爆',2,'trapBomb']];
+const heroDefs=[
+{name:'脅威度C',n:8,random:2},{name:'脅威度B',n:8,random:3},{name:'マシンマン',n:2,atk:[1,2,3,6],maxRoll:4},{name:'改造人間6号',n:2,atk:[4,5,6],cashKill:4},{name:'大白田 剣持郎',n:2,atk:[2,4,5],breakGear:true},{name:'アンペインマン',n:2,atk:[2,4,6],lethal:2},{name:'キャプテンジーニアス',n:2,atk:[2,4,6],lethal:4},{name:'フレイムマン',n:2,atk:[2,4,6],lethal:6},{name:'ソニックニンジャ',n:2,atk:[1,3,5],lethal:1},{name:'インセクトアーマー スタッグ',n:2,atk:[1,3,5],lethal:3},{name:'デスレッド',n:2,atk:[1,3,5],lethal:5},{name:'マイティウォリアーX',n:1,atk:[1,2,3,4,5,6],immune:true},{name:'アイ・アンペインマン',n:1,atk:[1,3,6],alwaysLethal:true},{name:'ギガントロボ',n:1,atk:[4,5,6],destroyTop:true},{name:'デスソニックニンジャ',n:1,atk:[2,3,5,6],discardEach:true},{name:'インセクトアーマー ギラファス',n:1,atk:[1,2,4,6],trapCost:5},{name:'改造人間7号',n:1,atk:[1,2,5],sum7:true}];
+function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}function makeMonsterDeck(){let a=[];for(const [name,n,atk,price,income,text,special={}] of monsters)for(let i=0;i<n;i++)a.push({id:uid(),name,atk,price,income,text,...special,gear:[]});return shuffle(a)}function makeSupply(){let a=[];for(const [name,n,type,val] of eventDefs)for(let i=0;i<n;i++)a.push({id:uid(),kind:'event',name,type,val});for(const [name,n,type,val] of gearDefs)for(let i=0;i<n;i++)a.push({id:uid(),kind:(type.startsWith('trap')?'trap':'gear'),name,type,val});for(let i=0;i<30;i++)a.push({id:uid(),kind:'raidTrigger',name:'襲撃カード'});return shuffle(a)}function makeRaid(){let a=[];for(let i=0;i<5;i++)a.push({name:'ギガント',gigant:true});for(let i=0;i<5;i++)a.push({name:'誤報',falseAlarm:true});for(const h of heroDefs)for(let i=0;i<h.n;i++){let x={...h};if(x.random){let nums=shuffle([1,2,3,4,5,6].slice()).slice(0,x.random).sort();x.atk=nums}a.push(x)}return shuffle(a)}
+let S;function makeTroop(){return{id:uid(),name:'戦闘員',atk:[1],price:2,income:1,text:'基本戦闘員。攻撃判定【1】。雇用費2万円。労働1万円。',troop:true,gear:[]}}function makeBoss(){return{id:'boss',name:'首領',atk:[],text:'基地の最下層に固定。配置効果：1万円獲得し、勝利点を1%獲得する。通常の配置変更・装備対象にはできない。',boss:true,gear:[]}}function fresh(){let floors=Array(5).fill(null);floors[0]=makeTroop();floors[1]=makeTroop();floors[4]=makeBoss();let st={money:5,vp:0,raid:4,turn:0,troops:2,monsterDeck:makeMonsterDeck(),monsterDiscard:[],market:[],reserve:[],floors,selected:null,supply:makeSupply(),hand:[],discard:[],coupon:0,half:false,raidDeck:makeRaid(),battle:null,phase:'ready',resolved:false,drawn:false,marketRefreshed:false,redUsed:false};while(st.hand.length<4){let x=st.supply.pop();if(x.kind==='raidTrigger')st.supply.unshift(x);else st.hand.push(x)}st.supply=shuffle(st.supply);return st}
+function refill(){while(S.market.length<4){if(!S.monsterDeck.length&&S.monsterDiscard.length){S.monsterDeck=shuffle(S.monsterDiscard.splice(0));log('怪人捨札をシャッフルして市場山札へ戻した')}if(!S.monsterDeck.length)break;S.market.push(S.monsterDeck.pop())}}function resetMarketAfterRaid(){if(S.pendingRevives&&S.pendingRevives.length){for(const r of S.pendingRevives){if(!S.floors[r.i]){S.floors[r.i]=r.c;log(`${r.c.name}が襲撃終了後に復活`,'ok',r.c)}else{S.reserve.push(r.c);log(`${r.c.name}は元フロアが埋まっているため未配置へ復活`,'ok',r.c)}}S.pendingRevives=[]}if(!S.monsterDiscard)S.monsterDiscard=[];S.monsterDiscard.push(...S.market.splice(0));refill();log('襲撃終了：怪人市場を全リセット')}let logDetailSeq=0,logDetails={};function log(t,cls='',detail=null){let d=document.createElement('div');d.textContent=t;if(cls)d.className=cls;if(detail){let k='L'+(++logDetailSeq);logDetails[k]=JSON.parse(JSON.stringify(detail));d.dataset.logDetail=k;d.title='右クリックでカード詳細'}document.querySelector('#log').prepend(d)}function drawSupply(n=1,opt={}){for(let i=0;i<n;i++){if(!S.supply.length){S.supply=shuffle(S.discard.splice(0));log('支給捨札をシャッフル')};if(!S.supply.length)break;let x=S.supply.pop();if(x.kind==='raidTrigger'){S.discard.push(x);if(opt.effectDraw){S.raid=Math.max(0,S.raid-1);log(`効果ドローで襲撃カードを引いた：襲撃は発生せず、襲撃カウントのみ進行 → ${S.raid}`);continue}if(S.turn===0){S.raid=Math.max(0,S.raid-1);log(`初回ターンに襲撃カードを引いた：初回ターンは襲撃なし。襲撃カウントのみ進行 → ${S.raid}`);continue}S.raid=4;let h=nextHero();triggerRaidCard(h,'襲撃カード')}else{S.hand.push(x);if(opt.countRaid){S.raid=Math.max(0,S.raid-1);log(`襲撃なし：襲撃カウント ${S.raid}`);if(S.raid===0){S.raid=4;triggerRaidCard(nextHero(),'襲撃カウント0')}}}}}
+function triggerRaidIncome(){for(const c of S.floors){if(!c||c.boss)continue;for(const g of c.gear||[])if(g.type==='selfHelp'){S.money+=3;log(`${c.name}の自己啓発本：襲撃発生 +3万円`,'ok',g)}}}function triggerRaidCard(h,source=''){if(!h)return;if(h.falseAlarm){log(`${source}：誤報。襲撃なし`,'ok',h);return}triggerRaidIncome();if(h.gigant){let i=topOccupied();if(i<0){log('ギガント：怪人なし');resetMarketAfterRaid();render();return}let c=S.floors[i];if(c.hercules){log('ギガントをヘラクレスが完全無効化','ok',h);resetMarketAfterRaid();render();return}killAt(i,'ギガント');log(`ギガント：${5-i}Fの怪人を殺害`,'danger',h);resetMarketAfterRaid();render();return}beginHeroRaid(h,source)}
+function startDraw(){if(S.drawn)return;drawSupply(1,{countRaid:true});S.drawn=true;S.phase='effects';render()}function placementTargetsForForgery(fi){let a=[];if(fi>0&&S.floors[fi-1]&&!S.floors[fi-1].boss)a.push({i:fi-1,c:S.floors[fi-1],label:'1つ上'});if(fi<4&&S.floors[fi+1]&&!S.floors[fi+1].boss)a.push({i:fi+1,c:S.floors[fi+1],label:'1つ下'});return a}
+function applyPlacement(c,fi,source='通常',depth=0){if(!c||c.boss)return;let inc=c.income||0;if(c.gear&&c.gear.some(g=>g.type==='book'))inc++;if(c.name==='戦闘員'&&c.gear&&c.gear.some(g=>g.type==='suicideBelt'))inc++;let cap=S.floors.find(x=>x&&x.captain);if(c.name==='戦闘員'&&cap){let ci=S.floors.indexOf(cap);if(fi>ci)inc*=2}if(inc){S.money+=inc;log(`${source}${c.name}：労働 +${inc}万`)}if(c.vp){S.vp+=c.vp;log(`${source}${c.name}：配信 +${c.vp}%`)}if(c.draw){drawSupply(c.draw,{effectDraw:true})}if(c.captain){S.vp+=S.troops*2;log(`${source}隊長：戦闘員${S.troops}体 → +${S.troops*2}%`)}if(c.name==='贋作'&&depth<4){let ts=placementTargetsForForgery(fi);if(!ts.length){log('贋作：コピーできる隣接怪人がいない');return}let pick=ts[0];if(ts.length===2){let ans=prompt(`贋作：どちらの配置効果を使用しますか？\n1=${ts[0].label} ${ts[0].c.name}\n2=${ts[1].label} ${ts[1].c.name}`,'1');pick=ans==='2'?ts[1]:ts[0]}log(`贋作：${pick.label}の「${pick.c.name}」の配置効果を使用`);applyPlacement(pick.c,pick.i,'贋作→',depth+1)}}
+function resolveEffects(){if(!S.drawn){log('先に支給カードを引いてください');return}if(S.resolved)return;for(let f=0;f<5;f++){let c=S.floors[f];if(c){if(c.boss){S.money+=1;S.vp+=1;log('首領：1万円獲得／勝利点+1%')}else applyPlacement(c,f)}}S.resolved=true;S.phase='action';render()}
+function refreshMarketPaid(){if(S.battle){log('襲撃中は市場更新できません');return}if(S.marketRefreshed){log('怪人市場の有料更新は1ターンに1回まで');return}if(S.money<5){log('怪人市場更新：5万円必要');return}S.money-=5;S.monsterDiscard.push(...S.market.splice(0));refill();S.marketRefreshed=true;log('5万円支払い：怪人市場を全更新','ok');render()}function hire(){if(S.money<2){log('戦闘員雇用：資金不足');return}S.money-=2;S.troops++;S.reserve.push(makeTroop());log('戦闘員を2万円で雇用');render()}function merchantDiscount(){return S.floors.filter(c=>c&&c.merchant).length*2}function priceInfo(c){let base=c.price,merchant=merchantDiscount(),afterMerchant=Math.max(0,base-merchant),afterCoupon=Math.max(0,afterMerchant-(S.coupon||0)),final=S.half?Math.ceil(afterCoupon/2):afterCoupon;let parts=[`${base}万`];if(merchant)parts.push(`商人-${merchant}万`);if(S.coupon)parts.push(`クーポン-${S.coupon}万`);if(S.half)parts.push('半額');return{final,detail:parts.join(' → ')}}function buy(id){let i=S.market.findIndex(x=>x.id===id);if(i<0)return;let c=S.market[i],pi=priceInfo(c),p=pi.final;if(S.money<p){log(`資金不足：${c.name} ${pi.detail} = ${p}万円`);return}S.money-=p;S.coupon=0;S.half=false;S.reserve.push(c);S.market.splice(i,1);refill();log(`${c.name}購入：${pi.detail} = ${p}万円`,'ok',c);render()}function selectReserve(id){S.selected={where:'reserve',id};render()}function selectFloor(i){let c=S.floors[i];if(c&&c.boss){S.selected=null;log('首領は最下層に固定されています');render();return}if(S.selected&&S.selected.where==='reserve'&&!c){let ri=S.reserve.findIndex(x=>x.id===S.selected.id),x=S.reserve.splice(ri,1)[0];S.floors[i]=x;S.selected=null;log(`${x.name}を${5-i}Fへ配置`);render();return}if(S.selected&&S.selected.where==='floor'&&S.selected.i!==i){let a=S.selected.i;[S.floors[a],S.floors[i]]=[S.floors[i],S.floors[a]];S.selected=null;log('配置を変更');render();return}if(c){S.selected={where:'floor',i};render()}}
+function effectiveAttackNums(c,fi){if(!c||!c.atk)return[];let nums=[...c.atk];if(c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap);if(fi<ci){let fighterFloor=5-fi;let add=fighterFloor===1?2:fighterFloor===2?3:fighterFloor===3?4:null;if(add&&!nums.includes(add))nums.push(add)}}}for(const g of c.gear||[]){if(g.type==='shield'&&!nums.includes(g.val))nums.push(g.val);if(g.type==='suicideBelt')for(const n of [2,3])if(!nums.includes(n))nums.push(n)}return nums.sort()}function heroRank(h){if(!h||h.gigant||h.falseAlarm)return'';if(h.name==='脅威度C')return'C';if(h.name==='脅威度B')return'B';const s=['マイティウォリアーX','アイ・アンペインマン','ギガントロボ','デスソニックニンジャ','インセクトアーマー ギラファス','改造人間7号'];return s.includes(h.name)?'S':'A'}function heroLabel(h){let r=heroRank(h);return r?`脅威度${r}｜${h.name}`:h.name}function soloOriginalText(name){return {'偽装工作':'10万円支払い、相手の襲撃カウントを0にする。','妨害工作':'5万円支払い、相手の装備カードを1枚破壊する。','妨害工作2':'5万円支払い、相手の襲撃カウントを1進める。','破壊工作2':'2万円支払い、相手の手札をランダムに1枚捨てさせる。'}[name]||'対戦相手を対象にする効果。'}
+function disposeFloor(i){
+ let c=S.floors[i];
+ if(!c){log('処分：このフロアは空です');return}
+ if(c.boss){log('首領は処分できません','danger',c);return}
+ if(S.battle){log('襲撃中は配置カードを処分できません','danger');return}
+ // 装備はすべて支給捨札へ。怪人は怪人捨札へ。戦闘員はゲームから除外。
+ const gears=[...(c.gear||[])];
+ gears.forEach(g=>{S.discard.push(g);log(`処分：${c.name}の装備「${g.name}」を支給捨札へ`,'',g)});
+ c.gear=[];
+ S.floors[i]=null;
+ if(c.troop){
+   S.troops=Math.max(0,S.troops-1);
+   log(`処分：${5-i}Fの戦闘員をゲームから除外（戦闘員 ${S.troops}体）`,'ok',c);
+ }else{
+   S.monsterDiscard.push(c);
+   log(`処分：${5-i}Fの${c.name}を怪人捨札へ`,'ok',c);
+ }
+ if(S.selected&&S.selected.where==='floor'&&S.selected.i===i)S.selected=null;
+ render();
+}
+function isRedEvent(c){return c&&c.kind==='event'&&(c.name==='勝利点20%'||c.name==='5万円獲得'||c.type==='half'||c.type==='salvage'||['偽装工作','妨害工作','妨害工作2'].includes(c.name))}function useCard(id){let i=S.hand.findIndex(x=>x.id===id);if(i<0)return;let c=S.hand[i];if(S.battle&&c.kind==='event'){log('襲撃中はイベントカードを使用できません','danger');return}if(isRedEvent(c)&&S.redUsed){log('赤イベントカードは1ターンに1枚までです','danger');return}if(c.kind==='gear'){let target=S.selected&&S.selected.where==='floor'?S.floors[S.selected.i]:null;if(!target){log('装備先の怪人を基地で選択してください');return}if(target.hercules){log('ヘラクレスは装備不可');return}if((target.gear||[]).length>=1){log(`${target.name}はすでに装備カードを1枚装備しています`,'danger');return}if(c.type==='suicideBelt'&&!target.troop){log('自爆ベルトは戦闘員専用');return}let fi=S.floors.indexOf(target),now=effectiveAttackNums(target,fi);let adds=c.type==='shield'?[c.val]:c.type==='suicideBelt'?[2,3]:[];let dup=adds.filter(n=>now.includes(n));if(dup.length){log(`${c.name}は装備不可：追加する攻撃判定【${dup.join('・')}】が既に${target.name}の攻撃判定に含まれています`,'danger',c);return}target.gear.push(c);S.hand.splice(i,1);log(`${target.name}に${c.name}を装備`);render();return}if(c.kind==='trap'||c.kind==='white'){log(`${c.name}は襲撃中に使用します`);return}let ok=applyEvent(c);if(ok!==false){if(isRedEvent(c))S.redUsed=true;S.hand.splice(i,1);S.discard.push(c)}render()}
+function applyEvent(c){switch(c.type){case'vp':S.vp+=c.val;log(`${c.name}使用`);break;case'money':S.money+=c.val;log(`${c.name}使用`);break;case'draw':drawSupply(c.val,{effectDraw:true});break;case'coupon':S.coupon=(S.coupon||0)+c.val;log(`怪人割引クーポン：合計${S.coupon}万円引き（次回購入時に消費）`);break;case'half':S.half=true;log('次の怪人購入 半額');break;case'raidReset':S.raid=4;log('襲撃カウントを4へ');break;case'choice1':{let x=prompt('1=VP+2% / 2=1万円 / 3=1枚引く','1');if(x==='2')S.money+=1;else if(x==='3')drawSupply(1);else S.vp+=2;break}case'choice2':{let x=prompt('1=VP+5% / 2=3万円 / 3=2枚引く','1');if(x==='2')S.money+=3;else if(x==='3')drawSupply(2);else S.vp+=5;break}case'salvage':if(S.money<5){log('鹵獲作戦：5万円必要');return false}if(!S.discard.length){log('捨札がない');return false}S.money-=5;S.hand.push(S.discard.pop());log('鹵獲作戦：捨札の一番上を回収');break;case'solo':log(`${c.name}を使用。本来の効果：${soloOriginalText(c.name)}／1人テストでは対戦相手がいないため効果なし。カードは消費。`, 'phase', c);break}return true}
+function endTurn(){if(!S.drawn){log('支給カードを引いてから終了してください');return}if(!S.resolved)resolveEffects();S.turn=(S.turn||0)+1;S.drawn=false;S.resolved=false;S.marketRefreshed=false;S.redUsed=false;S.phase='supply';log(`第${S.turn}ターン終了。襲撃カウント ${S.raid}`,'phase');render();checkWin()}
+function topOccupied(){return S.floors.findIndex(c=>c&&!c.boss)}function nextHero(){if(!S.raidDeck.length)S.raidDeck=makeRaid();return S.raidDeck.pop()}function beginHeroRaid(h,source=''){S.battle={hero:h,floor:topOccupied(),rolls:0,prev:null,smoke:false};if(h.destroyTop){let i=topOccupied();if(i>=0&&!S.floors[i].hercules){killAt(i,'ギガントロボの効果');log('ギガントロボ：最上層怪人を1体破壊','danger');S.battle.floor=topOccupied()}}log(`${source?source+'：':''}${heroLabel(h)} 襲撃【${h.atk.join('・')}】`,'danger',h);render()}
+function startRaid(){triggerRaidCard(randomRaidCard(),'強制襲撃')}
+function killAt(i,reason){let c=S.floors[i];if(!c)return;if(c.name==='ゾンビ'&&i<3){let below=S.floors[i+1];if(below&&below.troop&&confirm('ゾンビの効果：1つ下の戦闘員をゾンビ【1・2】にしますか？')){let z=makeMonsterDeck().find(x=>x.name==='ゾンビ');if(z){z.id=uid();z.gear=below.gear||[];S.floors[i+1]=z;S.troops=Math.max(0,S.troops-1);log('ゾンビ効果：下層の戦闘員【1】をゾンビ【1・2】へ変化','ok',z)}}}let sub=c.gear.findIndex(g=>g.type==='substitute');if(sub>=0){let g=c.gear.splice(sub,1)[0];S.discard.push(g);log(`${c.name}：身代わりで死亡回避`);return false}if(c.gear.some(g=>g.type==='insurance')){S.money+=5;log('死亡保険 +5万円')}S.floors[i]=null;if(c.undead){S.pendingRevives=S.pendingRevives||[];S.pendingRevives.push({i,c});log(`${c.name}：襲撃終了後に復活予定`)}if(c.troop)S.troops=Math.max(0,S.troops-1);log(`${c.name}が殺害された（${reason}）`,'danger');return true}
+function battleRoll(){let b=S.battle;if(!b)return;let h=b.hero,i=topOccupied();b.floor=i;if(i<0){log(`${h.name}が首領まで到達。テスト敗北！`,'danger',h);S.battle=null;resetMarketAfterRaid();render();return}let c=S.floors[i];if(h.breakGear&&!c.hercules&&c.gear.length){let g=c.gear.shift();S.discard.push(g);log(`${h.name}が${c.name}の${g.name}を破壊`)}if(h.discardEach&&!c.hercules&&S.hand.length){let k=Math.floor(Math.random()*S.hand.length);let x=S.hand.splice(k,1)[0];S.discard.push(x);log(`デスソニック：手札「${x.name}」を破棄`)}let r=1+Math.floor(Math.random()*6);b.rolls++;let monsterAtk=[...c.atk];for(const g of (h.immune?[]:c.gear))if(g.type==='shield'&&!monsterAtk.includes(g.val))monsterAtk.push(g.val);if(c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap),steps=ci-i;let add=steps===1?2:steps===2?3:steps>=3?4:null;if(add&&!monsterAtk.includes(add))monsterAtk.push(add)}}if(!h.immune&&c.gear.some(g=>g.type==='suicideBelt'))for(const x of [2,3])if(!monsterAtk.includes(x))monsterAtk.push(x);let heroHit=h.atk.includes(r),monsterHit=monsterAtk.includes(r);if(b.smoke){heroHit=false;b.smoke=false;log('煙幕：このロールのヒーロー攻撃判定を無効化')}let lethal=!c.hercules&&(h.alwaysLethal||h.lethal===r||(h.sum7&&b.prev!==null&&b.prev+r===7));log(`戦闘 ${heroLabel(h)} vs ${c.name}：🎲${r}｜H:${heroHit?'攻撃':'-'} M:${monsterHit?'攻撃':'-'}`,'',[h,c]);b.prev=r;if(lethal){killAt(i,'必殺');advanceRaid();return}if(heroHit&&!monsterHit){let killed=killAt(i,'戦闘敗北');if(killed&&h.cashKill&&!c.hercules){let pay=Math.min(S.money,h.cashKill);S.money-=pay;log(`改造人間6号：${pay}万円支払い`)}advanceRaid();return}if(monsterHit){heroRetreat(c);return}if(h.maxRoll&&b.rolls>=h.maxRoll){log('マシンマン：4回ロールで自動撤収','ok');heroRetreat(c);return}render()}
+function advanceRaid(){if(!S.battle)return;let i=topOccupied();if(i<0){let h=S.battle.hero;log('ヒーローが首領まで到達。テスト敗北！','danger',h);S.battle=null;resetMarketAfterRaid()}else{log(`ヒーローは次のフロアへ進行`)}render()}function heroRetreat(c){let bonus=10,parts=['ヒーロー撃退 +10%'];if(c.victoryVp){bonus+=c.victoryVp;parts.push(`${c.name}効果 +${c.victoryVp}%`)}if(c.gear&&c.gear.some(g=>g.type==='sword')){bonus+=10;parts.push('剣 +10%')}S.vp+=bonus;log(`VP獲得：${parts.join(' / ')} = +${bonus}%`,'ok');if(c.gear){for(let j=c.gear.length-1;j>=0;j--){let g=c.gear[j];if(g.type==='shield'){let last=S.battle.prev;if(g.val===last){c.gear.splice(j,1);S.discard.push(g);log(`${g.name}を破壊`)}}if(g.type==='suicideBelt'){killAt(S.floors.indexOf(c),'自爆ベルト');break}}}if(c.shadow){let ci=S.floors.indexOf(c);if(ci>=0)killAt(ci,'戦闘後の犠牲')}let endedHero=S.battle.hero;log(`${endedHero.name}を撤退させた`,'ok',endedHero);S.battle=null;resetMarketAfterRaid();render();checkWin()}
+function useTrap(id){if(!S.battle)return;let i=S.hand.findIndex(x=>x.id===id);if(i<0)return;let c=S.hand[i],h=S.battle.hero,fi=topOccupied(),m=fi>=0?S.floors[fi]:null;if(!m)return;if(m.hercules){log('ヘラクレスは罠カードの効果を受けない');return}if(h.immune){log(`${h.name}は罠カードの効果を受けない`);return}let extra=h.trapCost||0;if(extra&&S.money<extra){log(`罠使用に${extra}万円必要`);return}if(extra)S.money-=extra;if(c.type==='trapSmoke'){S.battle.smoke=true;log('煙幕：次のロールでヒーロー攻撃判定を無効（簡易実装）')}else if(c.type==='trapReinforce'){if(S.battle.rolls<3){log('増援は3ターン経過後に使用可能');return}else{S.hand.splice(i,1);S.discard.push(c);heroRetreat(m);return}}else if(c.type==='trapBomb'){S.hand.splice(i,1);S.discard.push(c);killAt(fi,'自爆罠');let endedHero=S.battle.hero;log('自爆：勝利点なしでヒーロー撤退','ok',endedHero);S.battle=null;resetMarketAfterRaid();render();return}S.hand.splice(i,1);S.discard.push(c);render()}
+function heroText(h){if(!h)return[];let rows=[['分類',h.gigant?'特殊襲撃':h.falseAlarm?'誤報':'ヒーロー']];let rank=heroRank(h);if(rank)rows.push(['脅威度',rank]);if(h.atk)rows.push(['攻撃判定',h.atk.join('・')]);let t='';if(h.falseAlarm)t='襲撃は発生しない。';else if(h.gigant)t='最上階層を戦闘前効果を無視して壊滅させ、配置怪人を殺害する。ヘラクレスが配置されている場合はフロアを含めて無効。';else if(h.name==='脅威度C')t='攻撃判定はこのカード生成時にランダムな数字2つで決定する。';else if(h.name==='脅威度B')t='攻撃判定はこのカード生成時にランダムな数字3つで決定する。';else {const m={'マシンマン':'4回ダイスをロールしたら自動で撤収する。','改造人間6号':'相手怪人を殺害する度に4万円支払わせる。所持金は0未満にならない。ヘラクレス相手には発生しない。','大白田 剣持郎':'ダイスロール前に相手の装備カードを破壊する。','アンペインマン':'2が出た場合、相手の攻撃判定を無視して殺害する。','キャプテンジーニアス':'4が出た場合、相手の攻撃判定を無視して殺害する。','フレイムマン':'6が出た場合、相手の攻撃判定を無視して殺害する。','ソニックニンジャ':'1が出た場合、相手の攻撃判定を無視して殺害する。','インセクトアーマー スタッグ':'必殺：3が出た場合、相手の攻撃判定を無視して殺害する。','デスレッド':'5が出た場合、相手の攻撃判定を無視して殺害する。','マイティウォリアーX':'罠カード・装備カードの効果を受けない。','アイ・アンペインマン':'このカードは相手の攻撃判定を無視して殺害する。','ギガントロボ':'相手の最上層カードを1枚破壊する。','デスソニックニンジャ':'ダイスを振るたびに相手の手札を1枚ランダムに捨てさせる。','インセクトアーマー ギラファス':'相手が罠カードを使用するなら5万円支払わなければ発動できない。','改造人間7号':'前回振ったダイスと今回振ったダイスの合計が7だった場合、相手カードの効果を無視して殺害する。'};t=m[h.name]||'特殊効果なし。'}rows.push(['カード本文',t]);return rows}function cardText(c){if(!c)return'';if(c.gigant||c.falseAlarm||c.kind==='raid'||heroDefs.some(h=>h.name===c.name))return heroText(c);let rows=[];let kind=c.kind==='event'?'イベント':c.kind==='gear'?'装備':c.kind==='trap'?'罠':c.kind==='white'?'打ち消し':c.boss?'首領':c.troop?'戦闘員':'怪人';rows.push(['分類',kind]);if(c.atk&&c.atk.length)rows.push(['攻撃判定',c.atk.join('・')]);if(c.price!=null&&!c.boss)rows.push(['価格/雇用',`${c.price}万円`]);let txt=c.text||'';if(c.kind==='event'){const map={vp:`勝利点を${c.val}%獲得する。`,money:`${c.val}万円獲得する。`,draw:`手札を${c.val}枚引く。`,coupon:`怪人購入費を${c.val}万円引く。`,half:'怪人購入費を半額にする。',raidReset:'自分の襲撃カウントを4に戻す。',salvage:'5万円支払う。捨札にあるカードを回収する。',solo:`本来の効果：${soloOriginalText(c.name)}\n【1人テスト】対戦相手が存在しないため、この効果は発生しない。カード自体は使用して捨札へ送ることができる。`};txt=map[c.type]||txt}if(c.kind==='gear'||c.kind==='trap'||c.kind==='white'){const map={shield:`攻撃判定に${c.val}を追加する。${c.val}でバトルに勝利した場合、このカードを破壊する。`,suicideBelt:'戦闘員に装備。攻撃判定に2・3を加え、戦闘終了後に勝敗問わず戦闘員を犠牲にする。戦闘員の労働+1万円。',sword:'装備怪人がヒーローに勝利した場合、勝利点+10%（VP2倍ルール適用）。',substitute:'装備カードがバトルで殺害される場合、代わりにこのカードを破壊する。',insurance:'装備怪人がヒーローに殺害された時、5万円獲得する。',book:'装備カードの労働+1万円。',selfHelp:'襲撃が発生する度に3万円獲得する。',trapSmoke:'最初のターンのみ、相手の攻撃判定が発生しない。',trapReinforce:'このフロアで3ターン経過しているなら相手を撤退させる。',trapBomb:'フロアの怪人を装備ごと犠牲にして相手を撤退させる。この戦闘で勝利点は得られない。',white:`相手がカードを使用するタイミングで使用。装備カードには使用不可。相手のカード効果を無効化して破壊する。使用コスト${c.val}万円。`};txt=map[c.type]||txt}if(!c.kind&&!c.boss){const mm={
+'スパイ':'配置効果：選んだ相手のカードを1枚確認し、選んだカードを全員に公開させる。労働する。2万円獲得。ソロでは公開効果は発生しない。',
+'アイドル':'配置効果：労働する。2万円獲得。配信する。勝利点+6%。',
+'ビジネスマン':'配置効果：労働する。4万円獲得。',
+'トレーダー':'配置効果：労働する。2万円獲得。支給カードを1枚引く。引いたカードが襲撃だった場合、襲撃は発生せず襲撃カウンターを1進める。',
+'商人':'配置効果：労働する。3万円獲得。パッシブ：怪人購入費が2万円安くなる。',
+'ゾンビ':'配置効果：労働する。1万円獲得。パッシブ：敗北時、下のフロアにいる戦闘員をゾンビにすることができる。',
+'狙撃手':'配置効果：労働する。2万円獲得。自分の手札を1枚捨て、相手の手札をランダムに1枚捨てる。ソロでは妨害効果なし。',
+'贋作':'配置効果：1つ上層または1つ下層に配置されている怪人の配置効果を使用できる。首領は対象外。上下両方に怪人がいる場合はコピー先を選ぶ。',
+'戦闘員の隊長':'配置効果：労働する。2万円獲得。戦闘員の数×勝利点2%を獲得。パッシブ：自分より上層にいる戦闘員のみ攻撃判定を強化する。追加値は対象戦闘員自身の配置フロアで決まり、1F→【2】、2F→【3】、3F→【4】。隊長自身の配置フロアや隊長との距離では変化しない。自分より下層にいる戦闘員の労働金額を2倍にする。',
+'武士':'配置効果：労働する。2万円獲得。パッシブ：ヒーローを撤退させた時、勝利点+10%。',
+'騎士':'配置効果：労働する。2万円獲得。パッシブ：ヒーローを撤退させた時、勝利点+10%。',
+'凡怪人':'配置効果：労働する。3万円獲得。',
+'不死者':'配置効果：労働する。1万円獲得。配信する。勝利点+4%。パッシブ：襲撃中に殺害された場合、襲撃終了後に復活する。',
+'マイティウォリアーシャドウ':'攻撃判定1〜6。配置効果なし。パッシブ：戦闘後、このカードを犠牲にする。',
+'インセクトアーマー ヘラクレス':'配置効果：労働する。2万円獲得。パッシブ：相手カード・罠カードの効果を受けない。装備不可。ギガントの効果も無効化し、配置フロアも壊滅しない。ヘラクレスとの戦闘に由来する金銭効果も発生しない。'
+};txt=mm[c.name]||txt}rows.push(['カード本文',txt||'—']);return rows}
+function showDetail(c){if(!c)return;if(Array.isArray(c)){detailTitle.textContent='ログ内カード';detailBody.innerHTML=c.map(x=>`<h3>${x.name}</h3><div class="detailGrid">${cardText(x).map(([a,b])=>`<b>${a}</b><span>${b}</span>`).join('')}</div>`).join('<div class="divider"></div>')}else{detailTitle.textContent=c.name;detailBody.innerHTML='<div class="detailGrid">'+cardText(c).map(([a,b])=>`<b>${a}</b><span>${b}</span>`).join('')+'</div>'}detailBack.classList.add('open')}
+function bindDetails(){document.querySelectorAll('[data-detail-kind]').forEach(el=>el.addEventListener('contextmenu',e=>{e.preventDefault();let k=el.dataset.detailKind,id=el.dataset.detailId,c=null;if(k==='market')c=S.market.find(x=>x.id===id);else if(k==='reserve')c=S.reserve.find(x=>x.id===id);else if(k==='hand')c=S.hand.find(x=>x.id===id);else if(k==='floor')c=S.floors[+id];else if(k==='hero')c=S.battle&&S.battle.hero;showDetail(c)}));document.querySelectorAll('#log [data-log-detail]').forEach(el=>el.oncontextmenu=e=>{e.preventDefault();showDetail(logDetails[el.dataset.logDetail])})}
+function checkWin(){if(S.vp>=100)log('★★ 勝利点100%到達！ゲーム勝利 ★★','ok')}
+function attackDisplay(c,i){if(!c||!c.atk)return'';let base=[...c.atk],extra=[];if(c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap);if(i<ci){let fighterFloor=5-i;let add=fighterFloor===1?2:fighterFloor===2?3:fighterFloor===3?4:null;if(add&&!base.includes(add))extra.push({n:add,src:'戦闘員の隊長'})}}}for(const g of c.gear||[]){if(g.type==='shield'&&!base.includes(g.val)&&!extra.some(e=>e.n===g.val))extra.push({n:g.val,src:g.name});if(g.type==='suicideBelt')for(const n of [2,3])if(!base.includes(n)&&!extra.some(e=>e.n===n))extra.push({n,src:'自爆ベルト'})}return base.join('・')+(extra.length?'・'+extra.map(e=>`<span class="boost" title="${e.src}で追加">${e.n}</span>`).join('・'):'')}
+function activeEffects(c,i){let a=[];if(c&&c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap);if(i<ci){let fighterFloor=5-i;let add=fighterFloor===1?2:fighterFloor===2?3:fighterFloor===3?4:null;if(add)a.push(`隊長より上層かつ戦闘員自身が${fighterFloor}Fのため攻撃判定 <span class="boost">${add}</span> 追加`)}if(i>ci)a.push('隊長より下層のため労働金額2倍')}}for(const g of c?.gear||[]){if(g.type==='shield')a.push(`${g.name}により攻撃判定 <span class="boost">${g.val}</span> 追加`);if(g.type==='suicideBelt')a.push(`自爆ベルトにより攻撃判定 <span class="boost">2・3</span> 追加／労働+1万`);if(g.type==='book')a.push('ビジネス書により労働+1万')}return a}
+function render(){money.textContent=S.money;vp.textContent=S.vp;turnN.textContent=S.turn||0;raid.textContent=S.raid;troops.textContent=S.troops;handN.textContent=S.hand.length;deckN.textContent=S.supply.length;raidN.textContent=S.supply.filter(x=>x.kind==='raidTrigger').length;phaseText.innerHTML=`現在：<span class="phase">${S.battle?'襲撃戦闘中':S.phase==='ready'?'ゲーム開始準備完了':S.phase==='supply'?'支給フェイズ':S.phase==='effects'?'配置効果フェイズ':'行動フェイズ'}</span>`;drawBtn.disabled=S.drawn||!!S.battle;resolveBtn.disabled=!S.drawn||S.resolved||!!S.battle;hireBtn.disabled=!!S.battle;let rmb=document.querySelector('#refreshMarketBtn');if(rmb)rmb.disabled=!!S.battle||S.marketRefreshed||S.money<5;endBtn.disabled=!!S.battle;market.innerHTML=S.market.map(c=>`<div class="card" data-detail-kind="market" data-detail-id="${c.id}"><span class="price">${priceInfo(c).final}万</span><h3>${c.name}</h3><span class="tag">攻撃 ${c.atk.join('.')}</span><div class="desc">${c.text}<br><span class="small">購入計算：${priceInfo(c).detail} = ${priceInfo(c).final}万</span></div><div class="actions"><button class="primary" data-buy="${c.id}">購入</button></div></div>`).join('');reserve.innerHTML=S.reserve.length?S.reserve.map(c=>`<button class="${S.selected&&S.selected.where==='reserve'&&S.selected.id===c.id?'selected':''}" data-res="${c.id}" data-detail-kind="reserve" data-detail-id="${c.id}">${c.name}【${c.atk.join('.')}】</button>`).join(''):'<span class="small">なし</span>';eventHand.innerHTML=S.hand.filter(c=>c.kind==='event').map(c=>`<button data-card="${c.id}" data-detail-kind="hand" data-detail-id="${c.id}">${c.name}</button>`).join('')||'<span class="small">なし</span>';gearHand.innerHTML=S.hand.filter(c=>c.kind!=='event').map(c=>`<button data-card="${c.id}" data-trap="${c.kind==='trap'||c.kind==='white'?1:0}" data-detail-kind="hand" data-detail-id="${c.id}">${c.name}</button>`).join('')||'<span class="small">なし</span>';base.innerHTML=S.floors.map((c,i)=>`<div class="floor ${S.selected&&S.selected.where==='floor'&&S.selected.i===i?'selected':''}" data-floor="${i}" ${c?`data-detail-kind="floor" data-detail-id="${i}"`:''}><div class="floorHead"><span>${5-i}F</span><span>${c&&c.boss?'首領固定':''}</span></div>${c?`<span class="occupant">${c.name}</span>${c.boss?'':` <span class="tag atkline">攻撃 ${attackDisplay(c,i)}</span>`}<div class="small">${c.boss?'通常カード配置不可':`装備：${c.gear.length?c.gear.map(g=>g.name).join(' / '):'なし'}`}</div>${!c.boss&&activeEffects(c,i).length?`<div class="effectBox">${activeEffects(c,i).join('<br>')}</div>`:''}${!c.boss?`<div class="actions"><button type="button" class="disposeBtn" data-dispose="${i}" onclick="event.stopPropagation();disposeFloor(${i})">処分</button></div>`:''}`:'<span class="small">空き</span>'}</div>`).join('');if(S.battle){let h=S.battle.hero;let trapBtns=S.hand.filter(c=>c.kind==='trap').map(c=>`<button data-use-trap="${c.id}">${c.name}</button>`).join('');battleBox.innerHTML=`<div class="battle" data-detail-kind="hero" data-detail-id="current"><strong>${heroLabel(h)}</strong>　攻撃【${h.atk.join('.')}】<br>ロール回数 ${S.battle.rolls}<div class="actions"><button class="primary" id="rollBattle">ダイスを振る</button>${trapBtns}</div></div>`}else battleBox.textContent='現在襲撃なし';document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buy(b.dataset.buy));document.querySelectorAll('[data-res]').forEach(b=>b.onclick=()=>selectReserve(b.dataset.res));document.querySelectorAll('[data-floor]').forEach(b=>b.onclick=()=>selectFloor(+b.dataset.floor));document.querySelectorAll('[data-card]').forEach(b=>b.onclick=()=>useCard(b.dataset.card));document.querySelectorAll('[data-use-trap]').forEach(b=>b.onclick=()=>useTrap(b.dataset.useTrap));bindDetails();let rb=document.querySelector('#rollBattle');if(rb)rb.onclick=battleRoll}
+function reset(){logDetails={};logDetailSeq=0;S=fresh();refill();document.querySelector('#log').innerHTML='';log('ゲーム開始：経過ターン0／初期手札4枚／資金5万／戦闘員2体／首領は最下層固定／襲撃カウント4／支給山札には襲撃トリガーカード30枚／襲撃内容は別の襲撃デッキから公開');render()}detailClose.onclick=()=>detailBack.classList.remove('open');detailBack.onclick=e=>{if(e.target===detailBack)detailBack.classList.remove('open')};drawBtn.onclick=startDraw;resolveBtn.onclick=resolveEffects;hireBtn.onclick=hire;document.querySelector('#refreshMarketBtn').onclick=refreshMarketPaid;endBtn.onclick=endTurn;resetBtn.onclick=reset;reset();
+</script>
+
+
+
+<style>
+#mpSetup,#mpPass{position:fixed;inset:0;z-index:99999;background:#080a0ef5;display:flex;align-items:center;justify-content:center;padding:18px}
+#mpSetup.hide,#mpPass.hide{display:none}.mpBox{width:min(600px,100%);background:#171b23;color:#fff;border:1px solid #4b5563;border-radius:16px;padding:18px}
+.mpRow{display:flex;gap:8px;align-items:center;margin:8px 0}.mpRow input,.mpRow select{background:#0d1117;color:#fff;border:1px solid #4b5563;border-radius:8px;padding:9px}
+#mpBar{position:sticky;top:0;z-index:999;background:#0d1117ee;border-bottom:1px solid #3c4654;padding:8px 12px;font-weight:800}
+</style>
+<div id="mpSetup"><div class="mpBox"><h2>中小悪の組織 v2.2</h2><p>v1.2の処理を土台にしたパス＆プレイ版。</p>
+<div class="mpRow"><b>人数</b><select id="mpCount"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+<div id="mpNames"></div><button id="mpStart" class="primary">開始</button></div></div>
+<div id="mpPass" class="hide"><div class="mpBox" style="text-align:center"><div>端末を渡してください</div><h2 id="mpPassName"></h2><button id="mpReveal" class="primary">自分の画面を表示</button></div></div>
+<div id="mpBar"></div>
+<script>
+/* v2.2 clean multiplayer state wrapper */
+let MP={on:false,players:[],active:0,names:[],common:null};
+const personalKeys=['money','vp','raid','turn','troops','reserve','floors','selected','hand','coupon','half','battle','phase','resolved','drawn','marketRefreshed','redUsed','pendingRevives'];
+function takePersonal(st){let o={};for(const k of personalKeys)o[k]=st[k];return o}
+function loadP(i){MP.active=i;let p=MP.players[i],c=MP.common;S={...p,monsterDeck:c.monsterDeck,monsterDiscard:c.monsterDiscard,market:c.market,supply:c.supply,discard:c.discard,raidDeck:c.raidDeck}}
+function saveP(){if(!MP.on)return;let p=MP.players[MP.active];for(const k of personalKeys)p[k]=S[k];MP.common.monsterDeck=S.monsterDeck;MP.common.monsterDiscard=S.monsterDiscard;MP.common.market=S.market;MP.common.supply=S.supply;MP.common.discard=S.discard;MP.common.raidDeck=S.raidDeck}
+function others(){saveP();return MP.players.map((p,i)=>({p,i})).filter(x=>x.i!==MP.active)}
+function chooseOpponent(label){let a=others();if(!a.length)return null;if(a.length===1)return a[0];let n=+(prompt(label+'\n'+a.map((x,j)=>`${j+1}: P${x.i+1} ${MP.names[x.i]}`).join('\n'),'1'))-1;return a[n]||a[0]}
+function bar(){if(!MP.on)return;saveP();mpBar.innerHTML=`<b>P${MP.active+1} ${MP.names[MP.active]}</b>　`+MP.players.map((p,i)=>`P${i+1} ${p.vp}% / ${p.money}万 / 襲撃${p.raid}`).join('　｜　')}
+const baseRender=render;render=function(){baseRender();bar()};
+
+/* Multiplayer spy/sniper are integrated into placement resolution, not appended after turn. */
+const baseApplyPlacement=applyPlacement;
+applyPlacement=function(c,fi,source='通常',depth=0){
+ baseApplyPlacement(c,fi,source,depth);
+ if(!MP.on||source!=='通常')return;
+ if(c.name==='スパイ'){
+   let o=chooseOpponent('スパイ：対象プレイヤー');
+   if(!o)return;
+   if(!o.p.hand.length){log(`スパイ：${MP.names[o.i]}の手札は0枚`);return}
+   let n=+(prompt(`スパイ：${MP.names[o.i]}の手札を確認\n`+o.p.hand.map((x,j)=>`${j+1}. ${x.name}`).join('\n')+'\n公開するカード番号','1'))-1;
+   let x=o.p.hand[n]||o.p.hand[0];log(`スパイ：${MP.names[o.i]}の「${x.name}」を全員に公開`,'ok',x)
+ }
+ if(c.name==='狙撃手'){
+   if(!S.hand.length){log('狙撃手：自分の手札がないため妨害不可');return}
+   let n=+(prompt('狙撃手：捨てる自分の手札\n'+S.hand.map((x,j)=>`${j+1}. ${x.name}`).join('\n'),'1'))-1;
+   n=isNaN(n)||n<0||n>=S.hand.length?0:n;let own=S.hand.splice(n,1)[0];S.discard.push(own);
+   let o=chooseOpponent('狙撃手：対象プレイヤー');if(o&&o.p.hand.length){let k=Math.floor(Math.random()*o.p.hand.length),x=o.p.hand.splice(k,1)[0];S.discard.push(x);log(`狙撃手：${MP.names[o.i]}の手札をランダムに1枚捨てた`)}
+ }
+};
+
+/* Replace solo-only interference resolution before original applyEvent can consume it. */
+const baseUseCard=useCard;
+useCard=function(id){
+ let i=S.hand.findIndex(x=>x.id===id),c=S.hand[i];if(!c||!MP.on||c.type!=='solo')return baseUseCard(id);
+ if(S.battle)return log('襲撃中はイベントカードを使用できません','danger');
+ if(isRedEvent(c)&&S.redUsed)return log('赤イベントカードは1ターン1枚までです','danger');
+ let o=chooseOpponent(`${c.name}：対象プレイヤー`);if(!o)return log('対象プレイヤーがいません');
+ let cost=c.name==='偽装工作'?10:c.name==='破壊工作2'?2:5;if(S.money<cost)return log(`${cost}万円必要`,'danger');
+ if(c.name==='妨害工作'){
+   let geared=[];o.p.floors.forEach((x,fi)=>{if(x&&!x.boss&&(x.gear||[]).length)geared.push({x,fi})});
+   if(!geared.length)return log('対象プレイヤーに装備カードがありません','danger');
+   let q=geared[0];if(geared.length>1){let n=+(prompt(geared.map((z,j)=>`${j+1}. ${5-z.fi}F ${z.x.name} / ${z.x.gear.map(g=>g.name).join('/')}`).join('\n'),'1'))-1;q=geared[n]||q}
+   S.money-=cost;let g=q.x.gear.shift();S.discard.push(g);log(`妨害工作：${MP.names[o.i]}の${q.x.name}から${g.name}を破壊`)
+ } else if(c.name==='偽装工作'){S.money-=cost;o.p.raid=0;log(`偽装工作：${MP.names[o.i]}の襲撃カウントを0にした`)}
+ else if(c.name==='妨害工作2'){S.money-=cost;o.p.raid=Math.max(0,o.p.raid-1);log(`妨害工作2：${MP.names[o.i]}の襲撃カウントを1進めた`)}
+ else if(c.name==='破壊工作2'){if(!o.p.hand.length)return log('対象プレイヤーの手札がありません','danger');S.money-=cost;let k=Math.floor(Math.random()*o.p.hand.length),x=o.p.hand.splice(k,1)[0];S.discard.push(x);log(`破壊工作2：${MP.names[o.i]}の手札をランダムに1枚捨てた`)}
+ if(isRedEvent(c))S.redUsed=true;S.hand.splice(i,1);S.discard.push(c);render()
+};
+
+/* Real turn handoff between separate player states. */
+endTurn=function(){
+ if(S.battle)return log('襲撃中はターン終了できません');
+ if(!S.drawn)return log('先に支給カードを引いてください');
+ if(!S.resolved)return log('配置効果を処理してください');
+ S.turn++;S.drawn=false;S.resolved=false;S.marketRefreshed=false;S.redUsed=false;S.phase='supply';S.selected=null;saveP();
+ let ni=(MP.active+1)%MP.players.length;loadP(ni);log(`P${ni+1} ${MP.names[ni]} のターン開始`,'phase');
+ if(MP.players.length>1){mpPassName.textContent=`P${ni+1} ${MP.names[ni]}`;mpPass.classList.remove('hide')}render()
+};
+
+function namesUI(){let n=+mpCount.value;mpNames.innerHTML=Array.from({length:n},(_,i)=>`<div class="mpRow"><b>P${i+1}</b><input id="mpn${i}" value="プレイヤー${i+1}" maxlength="12"></div>`).join('')}
+mpCount.onchange=namesUI;namesUI();
+mpStart.onclick=()=>{
+ let n=+mpCount.value;MP.names=Array.from({length:n},(_,i)=>document.querySelector('#mpn'+i).value.trim()||`プレイヤー${i+1}`);
+ // Use current v1.2 state as the single shared game source.
+ let seed=fresh();S=seed;refill();seed=S;
+ MP.common={monsterDeck:seed.monsterDeck,monsterDiscard:seed.monsterDiscard,market:seed.market,supply:seed.supply,discard:seed.discard,raidDeck:seed.raidDeck};
+ // Put seed's private opening hand back, then deal all players from the same supply deck.
+ MP.common.supply.push(...seed.hand);MP.common.supply=shuffle(MP.common.supply);
+ MP.players=[];
+ for(let i=0;i<n;i++){
+   let st=fresh(),p=takePersonal(st);p.hand=[];p.turn=0;p.drawn=false;p.resolved=false;p.phase='ready';
+   while(p.hand.length<4){let x=MP.common.supply.pop();if(x.kind==='raidTrigger'){MP.common.supply.unshift(x);MP.common.supply=shuffle(MP.common.supply)}else p.hand.push(x)}
+   MP.players.push(p)
+ }
+ MP.on=true;loadP(0);log(`ゲーム開始：${n}人プレイ`,'ok');mpSetup.classList.add('hide');render()
+};
+mpReveal.onclick=()=>{mpPass.classList.add('hide');render()};
+resetBtn.onclick=()=>location.reload();
+</script>
+
+
+<style>
+#mpOpponentPanel{margin:10px 12px;padding:10px;background:#171b23;border:1px solid #465160;border-radius:12px}
+.mpOppGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.mpOpp{background:#0e1218;border:1px solid #394351;border-radius:9px;padding:8px}
+</style>
+<div id="mpOpponentPanel" class="hide"></div>
+<script>
+/* ===== v2.3 multiplayer execution fix =====
+   v2.2 had replaced endTurn(), but the original v1.2 button still held
+   a direct reference to the old solo function. Rebind the actual DOM control. */
+
+function mpOpponentUI(){
+ if(!MP.on)return;
+ saveP();
+ let box=document.querySelector('#mpOpponentPanel');
+ box.classList.remove('hide');
+ box.innerHTML=`<b>対戦状況：${MP.players.length}人プレイ / 現在 P${MP.active+1} ${MP.names[MP.active]}</b>
+ <div class="mpOppGrid" style="margin-top:8px">`+
+ MP.players.map((p,i)=>`<div class="mpOpp"><b>${i===MP.active?'▶ ':''}P${i+1} ${MP.names[i]}</b><br>
+ 資金 ${p.money}万 / VP ${p.vp}% / 襲撃 ${p.raid}<br>
+ 手札 ${p.hand.length}枚 / 未配置 ${p.reserve.length}体<br>
+ 基地：${p.floors.map((x,fi)=>x?`${5-fi}F ${x.name}`:null).filter(Boolean).join(' / ')}</div>`).join('')+
+ `</div>`;
+}
+const v23Render=render;
+render=function(){v23Render();mpOpponentUI()};
+
+/* Rebind turn-end button to the multiplayer-aware function. */
+endBtn.onclick=function(){ return endTurn(); };
+
+/* Make opponent targeting deterministic and visible. */
+chooseOpponent=function(label){
+ saveP();
+ let a=MP.players.map((p,i)=>({p,i})).filter(x=>x.i!==MP.active);
+ if(!a.length)return null;
+ if(a.length===1){log(`${label} → P${a[0].i+1} ${MP.names[a[0].i]}`,'phase');return a[0]}
+ let n=+(prompt(label+'\n'+a.map((x,j)=>`${j+1}: P${x.i+1} ${MP.names[x.i]}`).join('\n'),'1'))-1;
+ let o=a[n]||a[0];log(`${label} → P${o.i+1} ${MP.names[o.i]}`,'phase');return o
+};
+
+/* Explicit multiplayer implementations for Spy and Sniper.
+   They run during the normal placement-effect pass. */
+const v23Placement=applyPlacement;
+applyPlacement=function(c,fi,source='通常',depth=0){
+ // Run all original v1.2 income/VP/draw/counterfeit behavior first.
+ v23Placement(c,fi,source,depth);
+ if(!MP.on || source!=='通常')return;
+
+ if(c.name==='スパイ'){
+   let o=chooseOpponent('スパイ対象');
+   if(!o)return;
+   if(!o.p.hand.length){log(`スパイ：P${o.i+1}の手札は0枚`);return}
+   let list=o.p.hand.map((x,j)=>`${j+1}. ${x.name}`).join('\n');
+   let n=+(prompt(`P${o.i+1} ${MP.names[o.i]} の手札を確認しました。\n\n${list}\n\n全員に公開するカード番号`,'1'))-1;
+   if(!Number.isInteger(n)||n<0||n>=o.p.hand.length)n=0;
+   let x=o.p.hand[n];
+   log(`スパイ公開：P${o.i+1} ${MP.names[o.i]} の「${x.name}」`,'ok',x);
+ }
+
+ if(c.name==='狙撃手'){
+   if(!S.hand.length){log('狙撃手：自分の手札が0枚のため妨害効果なし');return}
+   let own=+(prompt('狙撃手：捨てる自分の手札を選択\n'+S.hand.map((x,j)=>`${j+1}. ${x.name}`).join('\n'),'1'))-1;
+   if(!Number.isInteger(own)||own<0||own>=S.hand.length)own=0;
+   let mine=S.hand.splice(own,1)[0];S.discard.push(mine);log('狙撃手：自分の手札を1枚捨てた');
+   let o=chooseOpponent('狙撃手対象');
+   if(o&&o.p.hand.length){
+     let k=Math.floor(Math.random()*o.p.hand.length),x=o.p.hand.splice(k,1)[0];S.discard.push(x);
+     log(`狙撃手：P${o.i+1} ${MP.names[o.i]} の手札をランダムに1枚捨てた`,'ok')
+   }else if(o)log(`狙撃手：P${o.i+1}の手札は0枚`);
+ }
+};
+
+/* Rebind resolve button too, so it always calls the current multiplayer-aware
+   placement resolver instead of any stale function reference. */
+resolveBtn.onclick=function(){ return resolveEffects(); };
+
+/* Re-implement multiplayer interference at the click boundary.
+   Inline hand buttons call useCard() by name, so this is the definitive path. */
+const v23UseCard=useCard;
+useCard=function(id){
+ let i=S.hand.findIndex(x=>x.id===id),c=S.hand[i];
+ if(!c || !MP.on || c.type!=='solo')return v23UseCard(id);
+ if(S.battle)return log('襲撃中はイベントカードを使用できません','danger');
+ if(isRedEvent(c)&&S.redUsed)return log('赤イベントカードは1ターンに1枚までです','danger');
+
+ let o=chooseOpponent(c.name+' の対象');
+ if(!o)return log('対戦相手がいません','danger');
+
+ let cost=c.name==='偽装工作'?10:c.name==='破壊工作2'?2:5;
+ if(S.money<cost)return log(`${c.name}：${cost}万円必要`,'danger');
+
+ if(c.name==='偽装工作'){
+   S.money-=10;o.p.raid=0;
+   log(`偽装工作：P${o.i+1} ${MP.names[o.i]} の襲撃カウントを0にした`,'ok');
+ }else if(c.name==='妨害工作2'){
+   S.money-=5;o.p.raid=Math.max(0,o.p.raid-1);
+   log(`妨害工作2：P${o.i+1} ${MP.names[o.i]} の襲撃カウントを1進めた → ${o.p.raid}`,'ok');
+ }else if(c.name==='破壊工作2'){
+   if(!o.p.hand.length)return log('対象の手札が0枚のため使用できません','danger');
+   S.money-=2;let k=Math.floor(Math.random()*o.p.hand.length);let x=o.p.hand.splice(k,1)[0];S.discard.push(x);
+   log(`破壊工作2：P${o.i+1} ${MP.names[o.i]} の手札をランダムに1枚捨てた`,'ok');
+ }else if(c.name==='妨害工作'){
+   let geared=[];o.p.floors.forEach((x,fi)=>{if(x&&!x.boss&&(x.gear||[]).length)geared.push({x,fi})});
+   if(!geared.length)return log('対象プレイヤーに装備カードがないため使用できません','danger');
+   let q=geared[0];
+   if(geared.length>1){
+     let n=+(prompt(geared.map((z,j)=>`${j+1}. ${5-z.fi}F ${z.x.name} / ${z.x.gear.map(g=>g.name).join('/')}`).join('\n'),'1'))-1;
+     q=geared[n]||q
+   }
+   S.money-=5;let g=q.x.gear.shift();S.discard.push(g);
+   log(`妨害工作：P${o.i+1} ${MP.names[o.i]} の${q.x.name}から${g.name}を破壊`,'ok');
+ }
+ if(isRedEvent(c))S.redUsed=true;
+ S.hand.splice(i,1);S.discard.push(c);
+ saveP();render();
+};
+
+/* After setup, explicitly bind all live controls again. */
+const oldMpStart=mpStart.onclick;
+mpStart.onclick=function(){
+ oldMpStart();
+ endBtn.onclick=function(){return endTurn()};
+ resolveBtn.onclick=function(){return resolveEffects()};
+ drawBtn.onclick=function(){return startDraw()};
+ hireBtn.onclick=function(){return hire()};
+ refreshMarketBtn.onclick=function(){return refreshMarketPaid()};
+ render();
+};
+</script>
+
+
+<style>
+/* v2.4 card color distinction */
+.card.redCard{border-color:#c34b56!important;background:linear-gradient(180deg,#3b171d,#21171b)!important}
+.card.redCard::before{content:"赤札";display:inline-block;background:#b93643;color:#fff;font-weight:900;font-size:11px;border-radius:999px;padding:2px 7px;margin-bottom:5px}
+.card.normalEvent{border-color:#607087!important;background:linear-gradient(180deg,#202a37,#181d25)!important}
+button.redCard{background:#7d2630!important;border-color:#d05b66!important;color:#fff!important}
+button.normalEvent{background:#33445a!important;border-color:#70849e!important;color:#fff!important}
+.card.normalEvent::before{content:"通常カード";display:inline-block;background:#52647b;color:#fff;font-weight:900;font-size:11px;border-radius:999px;padding:2px 7px;margin-bottom:5px}
+#actionCounter{margin:8px 0;font-size:12px;font-weight:800}
+</style>
+<script>
+/* ===== v2.4 phase lock + card-use limits ===== */
+function isNormalEventCard(c){return c&&c.kind==='event'&&!isRedEvent(c)}
+function ensureTurnCounters(){
+ if(S.normalEventUsed==null)S.normalEventUsed=0;
+ if(S.turnStage==null)S.turnStage=S.drawn?(S.resolved?'action':'effects'):'draw';
+}
+function actionAllowed(){
+ ensureTurnCounters();
+ if(!S.drawn){log('先に支給カードを引いてください','danger');return false}
+ if(!S.resolved){log('先に配置効果を処理してください','danger');return false}
+ return true
+}
+function v24Decorate(){
+ ensureTurnCounters();
+ let host=document.querySelector('.actions')?.parentElement;
+ if(host&&!document.querySelector('#actionCounter')){
+   let d=document.createElement('div');d.id='actionCounter';host.appendChild(d)
+ }
+ let ac=document.querySelector('#actionCounter');
+ if(ac)ac.innerHTML=`通常カード使用：${S.normalEventUsed}/2　｜　赤札：${S.redUsed?'使用済み':'未使用'}　｜　現在：${!S.drawn?'支給カード待ち':!S.resolved?'配置効果待ち':'アクション可能'}`;
+
+ // Hand cards are the cards in the hand panel; mark red vs normal event visually.
+ document.querySelectorAll('[data-card]').forEach(el=>{
+   let c=S.hand.find(x=>x.id===el.dataset.card); if(!c)return;
+   let card=el.closest('.card')||el;
+   card.classList.remove('redCard','normalEvent');
+   el.classList.remove('redCard','normalEvent');
+   if(isRedEvent(c)){card.classList.add('redCard');el.classList.add('redCard')}
+   else if(isNormalEventCard(c)){card.classList.add('normalEvent');el.classList.add('normalEvent')}
+ });
+
+ // Hard phase lock on every actionable control except draw/resolve at the appropriate stage.
+ let lockedDraw=!S.drawn;
+ let lockedEffects=S.drawn&&!S.resolved;
+ hireBtn.disabled=lockedDraw||lockedEffects||!!S.battle;
+ refreshMarketBtn.disabled=lockedDraw||lockedEffects||!!S.battle||S.marketRefreshed||S.money<5;
+ endBtn.disabled=lockedDraw||lockedEffects||!!S.battle;
+ document.querySelectorAll('[data-buy],[data-card],[data-res],[data-floor]').forEach(el=>{
+   if(lockedDraw||lockedEffects){el.style.pointerEvents='none';el.style.opacity='.45'}
+   else {el.style.pointerEvents='';el.style.opacity=''}
+ });
+}
+const v24Render=render;
+render=function(){v24Render();v24Decorate()};
+
+/* Explicitly lock the underlying action functions too, not just the UI. */
+const v24Hire=hire;
+hire=function(){if(!actionAllowed())return;return v24Hire()};
+const v24Refresh=refreshMarketPaid;
+refreshMarketPaid=function(){if(!actionAllowed())return;return v24Refresh()};
+const v24Buy=buy;
+buy=function(id){if(!actionAllowed())return;return v24Buy(id)};
+const v24SelectReserve=selectReserve;
+selectReserve=function(id){if(!actionAllowed())return;return v24SelectReserve(id)};
+const v24SelectFloor=selectFloor;
+selectFloor=function(i){if(!actionAllowed())return;return v24SelectFloor(i)};
+
+/* Track phase transitions. */
+const v24Draw=startDraw;
+startDraw=function(){ensureTurnCounters();if(S.drawn)return;let r=v24Draw();S.turnStage=S.battle?'battle':'effects';render();return r};
+const v24Resolve=resolveEffects;
+resolveEffects=function(){ensureTurnCounters();if(!S.drawn)return log('先に支給カードを引いてください','danger');let r=v24Resolve();S.turnStage='action';render();return r};
+
+/* Card use:
+   - ordinary event cards: max 2 per turn
+   - red event cards: max 1 per turn
+   - equipment/traps are not counted as ordinary event cards
+*/
+const v24Use=useCard;
+useCard=function(id){
+ ensureTurnCounters();
+ let c=S.hand.find(x=>x.id===id);if(!c)return;
+ if(!S.battle&&!actionAllowed())return;
+ if(isNormalEventCard(c)&&S.normalEventUsed>=2)return log('通常カードは1ターン2枚までです','danger');
+ let before=S.hand.length;
+ let r=v24Use(id);
+ if(isNormalEventCard(c)&&S.hand.length<before)S.normalEventUsed++;
+ render();return r
+};
+
+/* Sniper: force a visible own-hand choice.
+   This intercepts placement before older multiplayer patches can run their sniper block.
+*/
+function sniperEffectV24(){
+ if(!S.hand.length){log('狙撃手：自分の手札が0枚のため妨害効果なし');return}
+ let labels=S.hand.map((x,j)=>`${j+1}. ${x.name}`).join('\n');
+ let raw=prompt('狙撃手：捨てる自分の手札を選んでください\n\n'+labels+'\n\n番号を入力','1');
+ if(raw===null){log('狙撃手：手札破棄をキャンセルしたため追加効果なし');return}
+ let n=parseInt(raw,10)-1;
+ if(!Number.isInteger(n)||n<0||n>=S.hand.length){log('狙撃手：有効な番号ではないため追加効果なし','danger');return}
+ let mine=S.hand.splice(n,1)[0];S.discard.push(mine);log(`狙撃手：自分で選んだ「${mine.name}」を捨てた`);
+ let o=chooseOpponent('狙撃手対象');
+ if(o&&o.p.hand.length){
+   let k=Math.floor(Math.random()*o.p.hand.length),x=o.p.hand.splice(k,1)[0];S.discard.push(x);
+   log(`狙撃手：P${o.i+1} ${MP.names[o.i]} の手札をランダムに1枚捨てた`,'ok')
+ } else if(o) log(`狙撃手：P${o.i+1}の手札は0枚`);
+}
+
+/* The previous patches appended sniper after base placement.
+   Temporarily rename it while calling the old chain, then run exactly one corrected sniper effect. */
+const v24Placement=applyPlacement;
+applyPlacement=function(c,fi,source='通常',depth=0){
+ if(MP.on&&source==='通常'&&c.name==='狙撃手'){
+   let original=c.name;c.name='狙撃手（処理中）';
+   v24Placement(c,fi,source,depth);
+   c.name=original;
+   sniperEffectV24();
+   return
+ }
+ return v24Placement(c,fi,source,depth)
+};
+
+/* Reset ordinary-card count on each player's turn and persist it. */
+if(!personalKeys.includes('normalEventUsed'))personalKeys.push('normalEventUsed');
+if(!personalKeys.includes('turnStage'))personalKeys.push('turnStage');
+const v24End=endTurn;
+endTurn=function(){
+ if(!actionAllowed())return;
+ let current=MP.active;
+ let r=v24End();
+ if(MP.on){
+   S.normalEventUsed=0;S.turnStage='draw';saveP();render()
+ }
+ return r
+};
+
+/* Rebind actual controls again after all overrides. */
+endBtn.onclick=()=>endTurn();
+resolveBtn.onclick=()=>resolveEffects();
+drawBtn.onclick=()=>startDraw();
+hireBtn.onclick=()=>hire();
+refreshMarketBtn.onclick=()=>refreshMarketPaid();
+</script>
+
+
+<style>
+#v25CardStatus{margin:10px 0 14px;padding:10px 12px;border:1px solid #465160;border-radius:10px;background:#111720;font-size:13px;font-weight:800;line-height:1.55}
+#v25SniperModal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px}
+#v25SniperModal.open{display:flex}
+#v25SniperBox{width:min(560px,100%);max-height:80vh;overflow:auto;background:#171d27;border:1px solid #657184;border-radius:14px;padding:16px}
+#v25SniperChoices{display:grid;gap:8px;margin-top:12px}
+#v25SniperChoices button{min-height:46px;text-align:left}
+</style>
+<div id="v25SniperModal">
+ <div id="v25SniperBox">
+  <h3 style="margin-top:0">狙撃手：捨てる手札を選択</h3>
+  <div>自分の手札から1枚選んで捨てます。その後、相手の手札をランダムに1枚捨てます。</div>
+  <div id="v25SniperChoices"></div>
+ </div>
+</div>
+<script>
+function v25CardMode(){if(S.redUsed)return'red';if((S.normalEventUsed||0)>0)return'normal';return'none'}
+function v25Status(){
+ ensureTurnCounters();
+ let old=document.querySelector('#actionCounter');if(old)old.style.display='none';
+ let panel=document.querySelector('#v25CardStatus');
+ if(!panel){
+  panel=document.createElement('div');panel.id='v25CardStatus';
+  let phase=document.querySelector('#phaseBox')||document.querySelector('.phase')||document.querySelector('#turnInfo')||drawBtn?.parentElement;
+  if(phase&&phase.parentElement)phase.insertAdjacentElement('afterend',panel);
+  else document.body.prepend(panel);
+ }
+ let mode=v25CardMode();
+ let usage=mode==='red'?'赤札を使用済み（通常カード使用不可）':mode==='normal'?`通常カード ${S.normalEventUsed}/2（赤札使用不可）`:'通常カード 0/2 または 赤札 0/1';
+ let ph=!S.drawn?'支給カード待ち':!S.resolved?'配置効果待ち':'アクション可能';
+ panel.innerHTML=`<div>カード使用枠：${usage}</div><div>現在：${ph}</div>`;
+}
+const v25Render=render;
+render=function(){v25Render();v25Status()};
+
+const v25UsePrevious=useCard;
+useCard=function(id){
+ ensureTurnCounters();
+ let c=S.hand.find(x=>x.id===id);if(!c)return;
+ if(!S.battle&&!actionAllowed())return;
+ let red=isRedEvent(c),normal=isNormalEventCard(c);
+ if(red&&(S.normalEventUsed||0)>0)return log('通常カードを使用したターンは赤札を使用できません','danger');
+ if(normal&&S.redUsed)return log('赤札を使用したターンは通常カードを使用できません','danger');
+ if(normal&&(S.normalEventUsed||0)>=2)return log('通常カードは1ターン2枚までです','danger');
+ let before=S.hand.length,beforeNormal=S.normalEventUsed||0;
+ let r=v25UsePrevious(id);
+ if(normal&&S.hand.length<before&&(S.normalEventUsed||0)===beforeNormal)S.normalEventUsed=beforeNormal+1;
+ render();return r;
+};
+
+function v25OpenSniper(){
+ if(!S.hand.length){log('狙撃手：自分の手札が0枚のため追加効果なし');return}
+ let modal=document.querySelector('#v25SniperModal'),choices=document.querySelector('#v25SniperChoices');
+ choices.innerHTML='';
+ S.hand.forEach((c,i)=>{
+  let b=document.createElement('button');b.type='button';b.textContent=`${i+1}. ${c.name}`;
+  b.onclick=()=>v25ResolveSniper(i);choices.appendChild(b);
+ });
+ modal.classList.add('open');
+}
+function v25ResolveSniper(index){
+ let modal=document.querySelector('#v25SniperModal');
+ if(index<0||index>=S.hand.length)return;
+ let mine=S.hand.splice(index,1)[0];S.discard.push(mine);
+ log(`狙撃手：自分で「${mine.name}」を選んで捨てた`);
+ let o=chooseOpponent('狙撃手対象');
+ if(o&&o.p.hand.length){
+  let k=Math.floor(Math.random()*o.p.hand.length),x=o.p.hand.splice(k,1)[0];S.discard.push(x);
+  log(`狙撃手：P${o.i+1} ${MP.names[o.i]} の手札をランダムに1枚捨てた`,'ok');
+ }else if(o)log(`狙撃手：P${o.i+1}の手札は0枚`);
+ modal.classList.remove('open');saveP();render();
+}
+const v25PlacementPrevious=applyPlacement;
+applyPlacement=function(c,fi,source='通常',depth=0){
+ if(MP.on&&source==='通常'&&c.name==='狙撃手'){
+  let original=c.name;c.name='狙撃手（効果選択待ち）';
+  v25PlacementPrevious(c,fi,source,depth);
+  c.name=original;v25OpenSniper();return;
+ }
+ return v25PlacementPrevious(c,fi,source,depth);
+};
+v25Status();
+</script>
+
+
+<style>
+/* ===== v2.6 mobile play layout ===== */
+#mobileTabs{display:none}
+@media(max-width:760px){
+ body{padding:8px!important}
+ .wrap,.container,main{max-width:100%!important;width:100%!important}
+ button{min-height:44px;font-size:15px}
+ .row,.actions{gap:7px;flex-wrap:wrap}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #market{grid-template-columns:1fr!important}
+ #base{grid-template-columns:1fr!important}
+ .card,.floor{min-width:0!important}
+ #mobileTabs{display:flex;position:sticky;top:0;z-index:200;background:#0d1118;padding:7px 0;gap:5px;overflow-x:auto}
+ #mobileTabs button{flex:1 0 auto;min-width:74px}
+ body.mobileTabMode .mobileSection{display:none!important}
+ body.mobileTabMode .mobileSection.mobileActive{display:block!important}
+ #v25SniperBox{max-height:72vh}
+}
+#v26ForgeryModal{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.74);display:none;align-items:center;justify-content:center;padding:16px}
+#v26ForgeryModal.open{display:flex}
+#v26ForgeryBox{width:min(580px,100%);background:#171d27;border:1px solid #657184;border-radius:14px;padding:16px}
+#v26ForgeryChoices{display:grid;gap:10px;margin-top:12px}
+#v26ForgeryChoices button{min-height:54px;text-align:left}
+</style>
+<div id="mobileTabs">
+ <button type="button" data-mtab="progress">進行</button>
+ <button type="button" data-mtab="base">基地</button>
+ <button type="button" data-mtab="hand">手札</button>
+ <button type="button" data-mtab="market">市場</button>
+ <button type="button" data-mtab="log">ログ</button>
+</div>
+<div id="v26ForgeryModal"><div id="v26ForgeryBox">
+ <h3 style="margin-top:0">贋作：コピーする配置効果を選択</h3>
+ <div id="v26ForgeryChoices"></div>
+</div></div>
+<script>
+/* ===== v2.6 bug consolidation ===== */
+
+/* Captain: two passives are independent.
+   Every Fighter above Captain gets an attack bonus.
+   Every Fighter below Captain gets doubled labor.
+   Attack bonus uses the Fighter's own displayed floor:
+   1F=>2, 2F=>3, 3F or higher=>4. */
+function v26CaptainBonus(fi){
+ let cap=S.floors.find(x=>x&&x.captain);if(!cap)return null;
+ let ci=S.floors.indexOf(cap);
+ if(fi>=ci)return null;
+ let floor=5-fi;
+ return floor===1?2:floor===2?3:4;
+}
+effectiveAttackNums=function(c,fi){
+ if(!c||!c.atk)return[];
+ let nums=[...c.atk];
+ if(c.troop){
+  let add=v26CaptainBonus(fi);
+  if(add&&!nums.includes(add))nums.push(add);
+ }
+ for(const g of c.gear||[]){
+  if(g.type==='shield'&&!nums.includes(g.val))nums.push(g.val);
+  if(g.type==='suicideBelt')for(const n of [2,3])if(!nums.includes(n))nums.push(n);
+ }
+ return nums.sort();
+};
+attackDisplay=function(c,i){
+ if(!c||!c.atk)return'';
+ let base=[...c.atk],extra=[];
+ if(c.troop){
+  let add=v26CaptainBonus(i);
+  if(add&&!base.includes(add))extra.push({n:add,src:'戦闘員の隊長'});
+ }
+ for(const g of c.gear||[]){
+  if(g.type==='shield'&&!base.includes(g.val)&&!extra.some(e=>e.n===g.val))extra.push({n:g.val,src:g.name});
+  if(g.type==='suicideBelt')for(const n of [2,3])if(!base.includes(n)&&!extra.some(e=>e.n===n))extra.push({n,src:'自爆ベルト'});
+ }
+ return base.join('・')+(extra.length?'・'+extra.map(e=>`<span class="boost" title="${e.src}で追加">${e.n}</span>`).join('・'):'');
+};
+activeEffects=function(c,i){
+ let a=[];
+ if(c&&c.troop){
+  let cap=S.floors.find(x=>x&&x.captain);
+  if(cap){
+   let ci=S.floors.indexOf(cap);
+   if(i<ci){let add=v26CaptainBonus(i);if(add)a.push(`隊長より上層：攻撃判定 <span class="boost">${add}</span> 追加`)}
+   if(i>ci)a.push('隊長より下層：労働金額2倍');
+  }
+ }
+ for(const g of c?.gear||[]){
+  if(g.type==='shield')a.push(`${g.name}により攻撃判定 <span class="boost">${g.val}</span> 追加`);
+  if(g.type==='suicideBelt')a.push(`自爆ベルトにより攻撃判定 <span class="boost">2・3</span> 追加／労働+1万`);
+  if(g.type==='book')a.push('ビジネス書により労働+1万');
+ }
+ return a;
+};
+
+/* Combat uses the same captain calculation as the UI. */
+const v26BattleOld=battleRoll;
+battleRoll=function(){
+ let b=S.battle;
+ if(!b)return;
+ /* Temporarily neutralize the old captain lookup by marking captain off,
+    then add the correct bonus directly to the fighter's base attack for this roll. */
+ let i=topOccupied(),c=i>=0?S.floors[i]:null;
+ if(c&&c.troop){
+  let add=v26CaptainBonus(i);
+  if(add&&!c.atk.includes(add)){
+   c.atk.push(add);
+   try{return v26BattleOld()}
+   finally{let k=c.atk.indexOf(add);if(k>=0)c.atk.splice(k,1)}
+  }
+ }
+ return v26BattleOld();
+};
+
+/* Undead: equipment is lost on death, before revival is queued.
+   Equipment goes to the supply discard; revived Undead has no equipment. */
+const v26KillOld=killAt;
+killAt=function(i,reason){
+ let c=S.floors[i];
+ if(c&&c.undead){
+  let gears=[...(c.gear||[])];
+  /* Preserve substitute behavior: if substitute exists, old kill routine handles survival. */
+  if(!gears.some(g=>g.type==='substitute')){
+   if(gears.length){
+    gears.forEach(g=>S.discard.push(g));
+    c.gear=[];
+    log(`不死者：死亡により装備${gears.length}枚を失った`);
+   }
+  }
+ }
+ return v26KillOld(i,reason);
+};
+
+/* Forgery: replace prompt/autopick with a visible mandatory choice.
+   Resolution pauses until the player taps upper/lower target. */
+let v26ForgeryQueue=null;
+function v26ForgeryChoose(fi,source,depth){
+ let ts=placementTargetsForForgery(fi);
+ if(!ts.length){log('贋作：コピーできる隣接怪人がいない');return}
+ if(ts.length===1){
+  let p=ts[0];log(`贋作：${p.label}の「${p.c.name}」の配置効果を使用`);
+  applyPlacement(p.c,p.i,'贋作→',depth+1);return;
+ }
+ v26ForgeryQueue={ts,source,depth};
+ let box=document.querySelector('#v26ForgeryChoices');box.innerHTML='';
+ ts.forEach((p,idx)=>{
+  let b=document.createElement('button');b.type='button';
+  b.innerHTML=`<strong>${p.label}：${p.c.name}</strong><br><span class="small">${p.c.text||''}</span>`;
+  b.onclick=()=>{
+   document.querySelector('#v26ForgeryModal').classList.remove('open');
+   v26ForgeryQueue=null;
+   log(`贋作：${p.label}の「${p.c.name}」の配置効果を使用`);
+   applyPlacement(p.c,p.i,'贋作→',depth+1);render();
+  };
+  box.appendChild(b);
+ });
+ document.querySelector('#v26ForgeryModal').classList.add('open');
+}
+
+/* Rebuild placement effects without the old Forgery branch.
+   Captain lower-income doubling is independent from attack buff. */
+applyPlacement=function(c,fi,source='通常',depth=0){
+ if(!c||c.boss)return;
+ let inc=c.income||0;
+ if(c.gear&&c.gear.some(g=>g.type==='book'))inc++;
+ if(c.name==='戦闘員'&&c.gear&&c.gear.some(g=>g.type==='suicideBelt'))inc++;
+ if(c.name==='戦闘員'){
+  let cap=S.floors.find(x=>x&&x.captain);
+  if(cap&&fi>S.floors.indexOf(cap))inc*=2;
+ }
+ if(inc){S.money+=inc;log(`${source}${c.name}：労働 +${inc}万`)}
+ if(c.vp){S.vp+=c.vp;log(`${source}${c.name}：配信 +${c.vp}%`)}
+ if(c.draw)drawSupply(c.draw,{effectDraw:true});
+ if(c.captain){S.vp+=S.troops*2;log(`${source}隊長：戦闘員${S.troops}体 → +${S.troops*2}%`)}
+ if(c.name==='スパイ'&&MP?.on&&source==='通常'){
+  let o=chooseOpponent('スパイ対象');
+  if(o&&o.p.hand.length){
+   let n=0;
+   if(o.p.hand.length>1){let r=prompt(o.p.hand.map((x,j)=>`${j+1}. ${x.name}`).join('\n'),'1');n=Math.max(0,Math.min(o.p.hand.length-1,(parseInt(r,10)||1)-1))}
+   log(`スパイ公開：P${o.i+1} ${MP.names[o.i]} の「${o.p.hand[n].name}」`,'ok',o.p.hand[n]);
+  }
+ }
+ if(c.name==='狙撃手'&&MP?.on&&source==='通常'){v25OpenSniper()}
+ if(c.name==='贋作'&&depth<4)v26ForgeryChoose(fi,source,depth);
+};
+
+/* Phase lock is enforced in the render state as well. */
+const v26RenderOld=render;
+render=function(){
+ v26RenderOld();
+ let locked=!S.drawn||!S.resolved;
+ if(hireBtn)hireBtn.disabled=locked||!!S.battle;
+ if(refreshMarketBtn)refreshMarketBtn.disabled=locked||!!S.battle||S.marketRefreshed||S.money<5;
+ if(endBtn)endBtn.disabled=locked||!!S.battle;
+ document.querySelectorAll('[data-buy],[data-res],[data-floor]').forEach(el=>{
+  if(locked){el.style.pointerEvents='none';el.style.opacity='.45'}
+  else{el.style.pointerEvents='';el.style.opacity=''}
+ });
+ v26MobileSections();
+};
+
+/* Mobile tabs: classify existing panels without changing desktop layout. */
+function v26MobileSections(){
+ let progress=phaseText?.closest('.panel');if(progress){progress.classList.add('mobileSection');progress.dataset.msection='progress'}
+ let b=base?.closest('.panel');if(b){b.classList.add('mobileSection');b.dataset.msection='base'}
+ let m=market?.closest('.panel');if(m){m.classList.add('mobileSection');m.dataset.msection='market'}
+ let h=eventHand?.closest('.panel');if(h){h.classList.add('mobileSection');h.dataset.msection='hand'}
+ let l=document.querySelector('#log')?.closest('.panel');if(l){l.classList.add('mobileSection');l.dataset.msection='log'}
+ if(window.matchMedia('(max-width:760px)').matches){
+  document.body.classList.add('mobileTabMode');
+  if(!document.querySelector('.mobileSection.mobileActive')){
+   let p=document.querySelector('[data-msection="progress"]');if(p)p.classList.add('mobileActive');
+  }
+ }else document.body.classList.remove('mobileTabMode');
+}
+document.querySelectorAll('#mobileTabs [data-mtab]').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('.mobileSection').forEach(x=>x.classList.remove('mobileActive'));
+ let x=document.querySelector(`[data-msection="${btn.dataset.mtab}"]`);if(x)x.classList.add('mobileActive');
+ window.scrollTo({top:0,behavior:'smooth'});
+}));
+window.addEventListener('resize',v26MobileSections);
+v26MobileSections();
+render();
+</script>
+
+<style>
+@media(max-width:760px){
+ #mpSetup{position:fixed!important;inset:0!important;z-index:30000!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;padding:16px!important;box-sizing:border-box!important}
+ #mpSetup>div{width:100%!important;max-width:520px!important;max-height:none!important;overflow:visible!important;margin:0 auto!important;box-sizing:border-box!important}
+ #mpStart{display:block!important;width:100%!important;min-height:52px!important;position:relative!important;z-index:30001!important;margin:14px 0 28px!important;pointer-events:auto!important;touch-action:manipulation}
+ #mobileTabs{z-index:250!important}
+}
+</style>
+<script>
+(function(){
+ const setup=document.querySelector('#mpSetup'), start=document.querySelector('#mpStart');
+ if(setup){setup.classList.remove('mobileSection','mobileActive');setup.style.pointerEvents='auto'}
+ if(start){start.disabled=false;start.style.pointerEvents='auto';start.style.touchAction='manipulation'}
+})();
+</script>
+
+<style>
+@media(max-width:760px){
+ #mpSetup{touch-action:pan-y!important}
+ #mpStart{
+   appearance:none!important;-webkit-appearance:none!important;
+   opacity:1!important;visibility:visible!important;
+   pointer-events:auto!important;touch-action:manipulation!important;
+   user-select:none!important;-webkit-user-select:none!important;
+ }
+}
+</style>
+<script>
+/* v2.6.2: iOS-safe start control.
+   Do not depend on the accumulated onclick wrapper chain.
+   A pointer/touch activation calls the original multiplayer setup starter directly. */
+(function(){
+ const old=document.querySelector('#mpStart');
+ if(!old)return;
+
+ /* Clone removes every accumulated addEventListener from prior patches.
+    Then use the latest known start implementation through the original v2.2 setup function body
+    captured by the old onclick property when available. */
+ const clean=old.cloneNode(true);
+ old.replaceWith(clean);
+ window.mpStart=clean;
+
+ let fired=false;
+ function activate(ev){
+   if(ev){ev.preventDefault();ev.stopPropagation()}
+   if(fired)return;
+   fired=true;
+   setTimeout(()=>fired=false,500);
+
+   /* The v2.3 patch stored the actual setup starter in oldMpStart.
+      Use it directly, avoiding the broken mobile wrapper chain. */
+   if(typeof oldMpStart==='function'){
+     oldMpStart.call(clean,ev);
+   }else if(typeof mpStartGame==='function'){
+     mpStartGame();
+   }else{
+     /* Last fallback: invoke the setup button's former inline code if present. */
+     const code=old.getAttribute('onclick');
+     if(code){Function(code).call(clean)}
+     else alert('開始処理を取得できませんでした');
+   }
+
+   /* Rebind live controls after setup, same as desktop multiplayer path. */
+   if(typeof endBtn!=='undefined')endBtn.onclick=()=>endTurn();
+   if(typeof resolveBtn!=='undefined')resolveBtn.onclick=()=>resolveEffects();
+   if(typeof drawBtn!=='undefined')drawBtn.onclick=()=>startDraw();
+   if(typeof hireBtn!=='undefined')hireBtn.onclick=()=>hire();
+   if(typeof refreshMarketBtn!=='undefined')refreshMarketBtn.onclick=()=>refreshMarketPaid();
+   if(typeof render==='function')render();
+ }
+
+ if(window.PointerEvent){
+   clean.addEventListener('pointerup',activate,{passive:false});
+ }else{
+   clean.addEventListener('touchend',activate,{passive:false});
+ }
+ clean.addEventListener('click',function(e){
+   if(e.detail===0)activate(e); /* keyboard/accessibility click */
+ },{passive:false});
+})();
+</script>
+
+
+<style>
+#v263Setup{display:none}
+@media(max-width:760px){
+ #mpSetup{display:none!important}
+ #v263Setup{
+  display:flex;position:fixed;inset:0;z-index:50000;background:#0d1118;
+  align-items:flex-start;justify-content:center;overflow-y:auto;padding:18px;box-sizing:border-box
+ }
+ #v263SetupBox{width:100%;max-width:520px;background:#171d27;border:1px solid #596578;border-radius:14px;padding:18px;box-sizing:border-box}
+ #v263Setup select,#v263Setup input,#v263Setup button{width:100%;min-height:50px;font-size:16px;margin-top:10px;box-sizing:border-box}
+ #v263Start{font-weight:900}
+}
+</style>
+<div id="v263Setup">
+ <form id="v264SetupForm" action="javascript:void(0)" onsubmit="return false"><div id="v263SetupBox">
+  <h2 style="margin-top:0">中小悪の組織</h2>
+  <div>プレイ人数</div>
+  <select id="v263Count"><option value="1">1人</option><option value="2" selected>2人</option><option value="3">3人</option><option value="4">4人</option></select>
+  <div id="v263Names"></div>
+  <button id="v263Start" type="submit">ゲーム開始</button>
+  <div id="v263Err" style="margin-top:10px;color:#ff9aa4"></div>
+ </div></form>
+</div>
+<script>
+/* v2.6.3: completely independent mobile setup.
+   It does not call any of the accumulated mpStart handlers. */
+(function(){
+ const root=document.querySelector('#v263Setup');
+ const count=document.querySelector('#v263Count');
+ const names=document.querySelector('#v263Names');
+ const start=document.querySelector('#v263Start');
+ const err=document.querySelector('#v263Err');
+ if(!root||!count||!names||!start)return;
+
+ function rebuildNames(){
+  names.innerHTML='';
+  let n=parseInt(count.value,10)||2;
+  for(let i=0;i<n;i++){
+   let inp=document.createElement('input');
+   inp.id='v263Name'+i;inp.value='PLAYER '+(i+1);inp.placeholder='PLAYER '+(i+1);
+   names.appendChild(inp);
+  }
+ }
+ count.addEventListener('change',rebuildNames);
+ rebuildNames();
+
+ function startMobileGame(e){
+  if(e){e.preventDefault();e.stopPropagation()}
+  err.textContent='';
+  try{
+   const n=parseInt(count.value,10)||2;
+   err.textContent='開始中：人数設定';
+   const playerNames=[];
+   for(let i=0;i<n;i++)playerNames.push((document.querySelector('#v263Name'+i)?.value||('PLAYER '+(i+1))).trim());
+
+   /* Build one canonical solo state, then split shared and personal state
+      using the multiplayer structures already used by the desktop build. */
+   err.textContent='開始中：初期データ生成';
+   S=fresh();
+
+   err.textContent='開始中：マルチプレイ生成';
+   MP.on=true;
+   MP.active=0;
+   MP.names=playerNames;
+   MP.players=[];
+   MP.common={
+     supply:S.supply,
+     discard:S.discard,
+     monsterDeck:S.monsterDeck,
+     monsterDiscard:S.monsterDiscard,
+     raidDeck:S.raidDeck,
+     market:S.market
+   };
+
+   /* Every player gets an independent fresh personal state while all decks/market
+      are replaced by the shared common references when loaded. */
+   err.textContent='開始中：プレイヤー生成';
+   for(let i=0;i<n;i++){
+     let p=fresh();
+     let personal={};
+     personalKeys.forEach(k=>{
+       if(k==='normalEventUsed')personal[k]=0;
+       else if(k==='turnStage')personal[k]='draw';
+       else if(k in p)personal[k]=p[k];
+     });
+     personal.normalEventUsed=0;
+     personal.turnStage='draw';
+     MP.players.push(personal);
+   }
+
+   err.textContent='開始中：PLAYER 1 読み込み';
+   loadP(0);
+
+   err.textContent='開始中：画面描画';
+   root.style.display='none';
+   document.body.classList.add('mobileTabMode');
+
+   if(typeof render==='function')render();
+   if(typeof v26MobileSections==='function')v26MobileSections();
+   log(`ゲーム開始：${n}人プレイ / P1 ${playerNames[0]}`,'phase');
+   err.textContent='';
+  }catch(ex){
+   err.textContent='開始処理エラー：'+(ex&&ex.message?ex.message:String(ex));
+   console.error(ex);
+  }
+ }
+
+ /* touchend is the primary iPhone path; click is a fallback.
+    The guard prevents the synthetic click from starting twice. */
+ let lastStart=0;
+ function guarded(e){
+   const now=Date.now();if(now-lastStart<700){if(e)e.preventDefault();return}
+   lastStart=now;startMobileGame(e);
+ }
+ /* v2.6.4 uses native form submit below instead of touch/click listeners. */
+ window.v264StartMobileGame=startMobileGame;
+})();
+</script>
+
+
+<style>
+@media(max-width:760px){
+ #v264SetupForm{display:block;width:100%;max-width:520px;margin:0;padding:0}
+ #v263Start{
+   display:block!important;position:static!important;width:100%!important;height:56px!important;
+   min-height:56px!important;margin:16px 0 24px!important;padding:0 16px!important;
+   border:2px solid #9aa7ba!important;border-radius:10px!important;
+   background:#2f6fed!important;color:#fff!important;font-size:18px!important;font-weight:900!important;
+   opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+   -webkit-appearance:button!important;appearance:auto!important;
+ }
+}
+</style>
+<script>
+(function(){
+ const form=document.querySelector('#v264SetupForm');
+ const btn=document.querySelector('#v263Start');
+ const err=document.querySelector('#v263Err');
+ if(!form||!btn)return;
+
+ /* Native form submit is deliberately used for iPhone/iOS.
+    No pointerup/touchend interception and no cloned button. */
+ form.addEventListener('submit',function(e){
+   e.preventDefault();
+   try{
+     if(typeof window.v264StartMobileGame!=='function')
+       throw new Error('スマホ開始関数が読み込まれていません');
+     window.v264StartMobileGame(e);
+   }catch(ex){
+     if(err)err.textContent='開始処理エラー：'+(ex&&ex.message?ex.message:String(ex));
+   }
+ },false);
+})();
+</script>
+
+
+<script>
+/* v2.6.6
+   Use the already-existing v2.2 multiplayer initializer instead of maintaining
+   a second mobile-only copy of the game-state initialization. */
+(function(){
+ const b=document.querySelector('#v263Start');
+ const mobileCount=document.querySelector('#v263Count');
+ const mobileNames=document.querySelector('#v263Names');
+ const err=document.querySelector('#v263Err');
+ const mobileRoot=document.querySelector('#v263Setup');
+ if(!b)return;
+
+ function canonicalMobileStart(ev){
+   if(ev){ev.preventDefault();ev.stopPropagation();}
+   try{
+     if(err)err.textContent='開始中…';
+
+     const n=parseInt(mobileCount.value,10)||2;
+
+     /* Feed the mobile choices into the original multiplayer setup UI. */
+     mpCount.value=String(n);
+     namesUI();
+     for(let i=0;i<n;i++){
+       const src=document.querySelector('#v263Name'+i);
+       const dst=document.querySelector('#mpn'+i);
+       if(dst)dst.value=(src&&src.value.trim())||('PLAYER '+(i+1));
+     }
+
+     /* This is the original v2.2 setup routine captured before later wrappers.
+        It creates the shared decks correctly, deals opening hands from the same
+        supply deck, creates MP.players, calls loadP(0), hides mpSetup and renders. */
+     if(typeof oldMpStart!=='function')
+       throw new Error('元のゲーム開始処理が見つかりません');
+     oldMpStart();
+
+     /* oldMpStart above is the v2.2 canonical initializer. */
+     if(!MP || !MP.on || !MP.players || MP.players.length!==n)
+       throw new Error('プレイヤー初期化が完了しませんでした');
+
+     if(mobileRoot)mobileRoot.style.setProperty('display','none','important');
+     if(typeof render==='function')render();
+
+     if(err)err.textContent='';
+   }catch(ex){
+     if(err)err.textContent='開始処理エラー：'+(ex&&ex.message?ex.message:String(ex));
+     console.error(ex);
+   }
+ }
+
+ /* Replace the button again so none of the previous mobile handlers remain. */
+ const clean=b.cloneNode(true);
+ b.replaceWith(clean);
+ clean.type='button';
+ clean.onclick=canonicalMobileStart;
+})();
+</script>
+
+
+<style>
+#v267Diag{display:none;position:fixed;left:8px;right:8px;bottom:8px;z-index:999999;
+background:#3a1117;color:#fff;border:2px solid #ff8794;border-radius:10px;padding:12px;
+font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;white-space:pre-wrap}
+</style>
+<div id="v267Diag"></div>
+<script>
+(function(){
+ const old=document.querySelector('#v263Start');
+ if(!old)return;
+ const btn=old.cloneNode(true); old.replaceWith(btn);
+ const diag=document.querySelector('#v267Diag');
+ const root=document.querySelector('#v263Setup');
+ function say(t,bad){
+   if(diag){diag.style.display='block';diag.style.background=bad?'#3a1117':'#17331e';diag.textContent=t}
+ }
+ window.addEventListener('error',e=>say('JavaScriptエラー\n'+e.message+'\n'+(e.filename||'')+':'+(e.lineno||''),true));
+ window.addEventListener('unhandledrejection',e=>say('Promiseエラー\n'+String(e.reason),true));
+
+ btn.type='button';
+ btn.onclick=function(e){
+  e.preventDefault();e.stopPropagation();
+  say('開始処理：1/6 ボタン反応',false);
+  try{
+   const n=parseInt(document.querySelector('#v263Count').value,10)||2;
+   say('開始処理：2/6 元セットアップへ人数反映',false);
+   if(typeof mpCount==='undefined'||typeof mpNames==='undefined')throw new Error('mpCount/mpNames が存在しません');
+   mpCount.value=String(n);
+
+   if(typeof namesUI!=='function')throw new Error('namesUI が存在しません');
+   namesUI();
+
+   say('開始処理：3/6 名前反映',false);
+   const inputs=mpNames.querySelectorAll('input');
+   if(inputs.length<n)throw new Error('元セットアップの名前欄が '+inputs.length+' 個しかありません');
+   for(let i=0;i<n;i++){
+    const x=document.querySelector('#v263Name'+i);
+    inputs[i].value=(x&&x.value.trim())||('PLAYER '+(i+1));
+   }
+
+   say('開始処理：4/6 元の開始関数実行',false);
+   if(typeof oldMpStart!=='function')throw new Error('oldMpStart が存在しません');
+   oldMpStart();
+
+   say('開始処理：5/6 初期化確認',false);
+   if(typeof MP==='undefined')throw new Error('MP が存在しません');
+   if(!MP.on)throw new Error('MP.on が false のままです');
+   if(!Array.isArray(MP.players))throw new Error('MP.players がありません');
+   if(MP.players.length!==n)throw new Error('players='+MP.players.length+' / expected='+n);
+
+   if(root)root.style.setProperty('display','none','important');
+   if(typeof render==='function')render();
+   say('開始処理：6/6 完了',false);
+   setTimeout(()=>{if(diag)diag.style.display='none'},1200);
+  }catch(ex){
+   say('開始処理エラー\n'+(ex&&ex.stack?ex.stack:(ex&&ex.message?ex.message:String(ex))),true);
+  }
+ };
+})();
+</script>
+
+
+<style>
+/* v2.6.8 clean mobile launcher */
+#v268Setup{display:none}
+@media(max-width:760px){
+ #mpSetup,#v263Setup,#v267Diag{display:none!important}
+ #v268Setup{
+  display:block!important;position:fixed;inset:0;z-index:2147483000;
+  background:#0d1118;color:#eef3fa;overflow:auto;padding:18px;box-sizing:border-box
+ }
+ #v268Box{max-width:520px;margin:0 auto;background:#171d27;border:1px solid #536071;border-radius:14px;padding:18px;box-sizing:border-box}
+ #v268Count,#v268Names input,#v268Start{
+  display:block;width:100%;min-height:52px;margin:10px 0;font-size:17px;box-sizing:border-box
+ }
+ #v268Start{border:0;border-radius:10px;background:#2f6fed;color:white;font-weight:900}
+ #v268Msg{white-space:pre-wrap;font-size:13px;margin-top:10px}
+}
+</style>
+
+<div id="v268Setup">
+ <div id="v268Box">
+  <h2 style="margin-top:0">中小悪の組織</h2>
+  <div>プレイ人数</div>
+  <select id="v268Count">
+   <option value="1">1人</option><option value="2" selected>2人</option>
+   <option value="3">3人</option><option value="4">4人</option>
+  </select>
+  <div id="v268Names"></div>
+  <button id="v268Start" type="button">ゲーム開始</button>
+  <div id="v268Msg"></div>
+ </div>
+</div>
+
+<script>
+(function(){
+ const root=document.getElementById('v268Setup');
+ const count=document.getElementById('v268Count');
+ const names=document.getElementById('v268Names');
+ const btn=document.getElementById('v268Start');
+ const msg=document.getElementById('v268Msg');
+ if(!root||!count||!names||!btn)return;
+
+ function makeNames(){
+   const n=Number(count.value)||2;
+   names.replaceChildren();
+   for(let i=0;i<n;i++){
+     const input=document.createElement('input');
+     input.type='text'; input.maxLength=12;
+     input.value='PLAYER '+(i+1);
+     input.dataset.player=String(i);
+     names.appendChild(input);
+   }
+ }
+ count.onchange=makeNames;
+ makeNames();
+
+ function fail(ex){
+   msg.style.color='#ff9aa4';
+   msg.textContent='開始エラー：'+(ex&&ex.message?ex.message:String(ex));
+ }
+ function begin(){
+   msg.style.color='#b7f5c4';
+   msg.textContent='ゲームを開始しています…';
+   try{
+     const n=Number(count.value)||2;
+     const entered=[...names.querySelectorAll('input')].slice(0,n)
+       .map((x,i)=>x.value.trim()||('PLAYER '+(i+1)));
+
+     /* Canonical v2.2 initialization, reproduced directly.
+        No form, no old start button, no old mobile wrapper. */
+     MP.names=entered;
+
+     let seed=fresh();
+     S=seed;
+     refill();
+     seed=S;
+
+     MP.common={
+       monsterDeck:seed.monsterDeck,
+       monsterDiscard:seed.monsterDiscard,
+       market:seed.market,
+       supply:seed.supply,
+       discard:seed.discard,
+       raidDeck:seed.raidDeck
+     };
+
+     MP.common.supply.push(...seed.hand);
+     MP.common.supply=shuffle(MP.common.supply);
+     MP.players=[];
+
+     for(let i=0;i<n;i++){
+       let st=fresh(), p=takePersonal(st);
+       p.hand=[]; p.turn=0; p.drawn=false; p.resolved=false; p.phase='ready';
+       let guard=0;
+       while(p.hand.length<4 && guard++<1000){
+         if(!MP.common.supply.length) throw new Error('支給デッキが空です');
+         let x=MP.common.supply.pop();
+         if(x.kind==='raidTrigger'){
+           MP.common.supply.unshift(x);
+           MP.common.supply=shuffle(MP.common.supply);
+         }else p.hand.push(x);
+       }
+       if(p.hand.length<4) throw new Error('初期手札を配れませんでした');
+       MP.players.push(p);
+     }
+
+     MP.on=true;
+     loadP(0);
+     root.style.display='none';
+     if(typeof log==='function')log(`ゲーム開始：${n}人プレイ`,'ok');
+     render();
+   }catch(ex){ fail(ex); }
+ }
+
+ /* Deliberately only one handler and no form semantics. */
+ btn.onclick=begin;
+})();
+</script>
+
+</body></html>

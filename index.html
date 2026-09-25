@@ -1186,55 +1186,46 @@ font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;white-spac
  function begin(){
    msg.style.color='#b7f5c4';
    msg.textContent='ゲームを開始しています…';
+   btn.disabled=true;
    try{
      const n=Number(count.value)||2;
      const entered=[...names.querySelectorAll('input')].slice(0,n)
        .map((x,i)=>x.value.trim()||('PLAYER '+(i+1)));
 
-     /* Canonical v2.2 initialization, reproduced directly.
-        No form, no old start button, no old mobile wrapper. */
-     MP.names=entered;
+     /* Hosted-page launcher: use the already-tested canonical multiplayer
+        initializer instead of maintaining a second copy of game setup. */
+     const oldCount=document.getElementById('mpCount');
+     const oldNames=document.getElementById('mpNames');
+     const oldStart=document.getElementById('mpStart');
+     if(!oldCount||!oldNames||!oldStart||typeof oldStart.onclick!=='function')
+       throw new Error('標準のゲーム初期化処理が見つかりません');
 
-     let seed=fresh();
-     S=seed;
-     refill();
-     seed=S;
-
-     MP.common={
-       monsterDeck:seed.monsterDeck,
-       monsterDiscard:seed.monsterDiscard,
-       market:seed.market,
-       supply:seed.supply,
-       discard:seed.discard,
-       raidDeck:seed.raidDeck
-     };
-
-     MP.common.supply.push(...seed.hand);
-     MP.common.supply=shuffle(MP.common.supply);
-     MP.players=[];
-
+     oldCount.value=String(n);
+     /* Rebuild canonical name inputs exactly as the original setup expects. */
+     oldCount.dispatchEvent(new Event('change',{bubbles:true}));
      for(let i=0;i<n;i++){
-       let st=fresh(), p=takePersonal(st);
-       p.hand=[]; p.turn=0; p.drawn=false; p.resolved=false; p.phase='ready';
-       let guard=0;
-       while(p.hand.length<4 && guard++<1000){
-         if(!MP.common.supply.length) throw new Error('支給デッキが空です');
-         let x=MP.common.supply.pop();
-         if(x.kind==='raidTrigger'){
-           MP.common.supply.unshift(x);
-           MP.common.supply=shuffle(MP.common.supply);
-         }else p.hand.push(x);
-       }
-       if(p.hand.length<4) throw new Error('初期手札を配れませんでした');
-       MP.players.push(p);
+       const x=document.getElementById('mpn'+i);
+       if(x)x.value=entered[i];
      }
 
-     MP.on=true;
-     loadP(0);
+     /* Hide this mobile-only launcher first. If canonical initialization throws,
+        restore it and show the real error instead of appearing to freeze. */
      root.style.display='none';
-     if(typeof log==='function')log(`ゲーム開始：${n}人プレイ`,'ok');
-     render();
-   }catch(ex){ fail(ex); }
+     try{
+       oldStart.onclick.call(oldStart);
+     }catch(ex){
+       root.style.display='flex';
+       throw ex;
+     }
+
+     if(!MP || !MP.on || !MP.players || MP.players.length!==n){
+       root.style.display='flex';
+       throw new Error('ゲーム初期化が完了しませんでした');
+     }
+   }catch(ex){
+     btn.disabled=false;
+     fail(ex);
+   }
  }
 
  /* Deliberately only one handler and no form semantics. */

@@ -32,15 +32,36 @@
   .detailGrid{grid-template-columns:78px 1fr;gap:5px 8px;font-size:12px}
   [data-detail-kind],[data-log-detail]{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
 }
+@media(max-width:760px){
+  /* v2.6.1 mobile compact layout: UI only */
+  #base .floor{position:relative;min-height:0;padding:6px 70px 6px 7px}
+  #base .floorHead{margin-bottom:2px;line-height:1.15}
+  #base .floor .small{line-height:1.2}
+  #base .floor .tag{margin:0 2px;padding:0 4px}
+  #base .floor .actions{position:absolute;right:6px;top:50%;transform:translateY(-50%);margin:0}
+  #base .floor .disposeBtn{min-height:34px;padding:4px 8px;font-size:12px}
+  #base .effectBox{margin-top:4px;padding:4px 5px;font-size:10px;line-height:1.25}
+
+  #market.market{gap:5px}
+  #market .card{padding:6px 6px 5px}
+  #market .card h3{font-size:12px;line-height:1.15;margin:0 34px 2px 0}
+  #market .price{font-size:11px;right:5px;top:5px}
+  #market .tag{font-size:9px;line-height:1.15;margin:0;padding:0 4px}
+  #market .desc{font-size:9px;line-height:1.2;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  #market .desc .small{font-size:9px;line-height:1.15}
+  #market .actions{margin-top:4px}
+  #market .actions button{width:100%;min-height:32px;padding:3px 6px;font-size:12px}
+}
 @media(max-width:380px){
-  .market{grid-template-columns:1fr}
+  /* keep two market columns even on narrow phones; long-press provides full details */
+  .market{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style></head><body><header><div class="top"><h1>中小悪の組織 <span class="small">1人テスト版 v1.2</span></h1><div class="stats"><span class="pill money">資金 <b id="money">5</b>万</span><span class="pill vp">VP <b id="vp">0</b>%</span><span class="pill">経過ターン <b id="turnN">0</b></span><span class="pill">襲撃 <b id="raid">4</b></span><span class="pill">戦闘員 <b id="troops">2</b></span><span class="pill">手札 <b id="handN">4</b></span><span class="pill">山札 <b id="deckN">0</b>（襲撃 <b id="raidN">0</b>）</span></div></div></header><main><section>
 <div class="panel"><h2>ターン進行</h2><div id="phaseText" class="sub"></div><div class="row"><button id="drawBtn" class="primary">① 支給カードを引く</button><button id="resolveBtn">② 配置効果を処理</button><button id="hireBtn">③ 戦闘員を雇用（2万）</button><button id="refreshMarketBtn">怪人市場更新（5万・1ターン1回）</button><button id="endBtn">④ ターン終了</button></div><div class="small" style="margin-top:8px">初期手札4枚・資金5万円・戦闘員2体・最下層に首領固定。支給→上層から配置効果→処分→市場更新/購入/雇用→配置変更→終了。初回ターンは襲撃なし。勝利条件100%。</div></div>
 <div class="panel"><h2>怪人市場</h2><div id="market" class="market"></div></div>
 <div class="panel"><h2>未配置</h2><div id="reserve" class="hand"></div><div class="small" style="margin-top:7px">怪人または戦闘員を選択→空きフロアをクリック。配置変更はターン中自由（試験仕様）。</div></div>
-<div class="panel"><h2>イベント手札</h2><div id="eventHand" class="hand"></div><div class="small" style="margin-top:7px">手札カードをクリックすると使用。カードは右クリックで詳細確認できます。</div></div>
-<div class="panel"><h2>装備・罠</h2><div id="gearHand" class="hand"></div><div class="small" style="margin-top:7px">装備は配置怪人を選んで使用。罠は襲撃中に使用。右クリックでカード本文を確認できます。</div></div>
+<div class="panel"><h2>イベント手札</h2><div id="eventHand" class="hand"></div><div class="small" style="margin-top:7px">手札カードをクリックすると使用。PCは右クリック、スマホは長押しで詳細確認できます。</div></div>
+<div class="panel"><h2>装備・罠</h2><div id="gearHand" class="hand"></div><div class="small" style="margin-top:7px">装備は配置怪人を選んで使用。罠は襲撃中に使用。PCは右クリック、スマホは長押しでカード本文を確認できます。</div></div>
 </section><section>
 <div class="panel"><h2>基地（5フロア固定）</h2><div id="base" class="base"></div></div>
 <div class="panel"><h2>襲撃</h2><div id="battleBox" class="small">現在襲撃なし</div></div>

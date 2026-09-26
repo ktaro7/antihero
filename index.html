@@ -1,6 +1,40 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>中小悪の組織 Solo v1.1</title>
 <style>
 :root{--bg:#0d0f13;--p:#171a21;--p2:#222732;--line:#3a414e;--text:#f3f4f6;--muted:#aab1bc;--red:#9b3636;--gold:#e5b85f;--green:#6ac68b;--boost:#69b7ff}*{box-sizing:border-box}body{margin:0;background:#0d0f13;color:var(--text);font-family:system-ui,-apple-system,"Yu Gothic",sans-serif}header{position:sticky;top:0;z-index:5;background:#0d0f13ee;border-bottom:1px solid var(--line);padding:10px 14px}.top{max-width:1400px;margin:auto;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}h1{font-size:19px;margin:0}.stats{display:flex;gap:7px;flex-wrap:wrap}.pill{padding:6px 9px;border-radius:999px;background:var(--p2);border:1px solid var(--line);font-weight:700;font-size:13px}.money{color:var(--green)}.vp{color:var(--gold)}main{max-width:1400px;margin:auto;padding:14px;display:grid;grid-template-columns:1.1fr .9fr;gap:14px}@media(max-width:950px){main{grid-template-columns:1fr}}.panel{background:var(--p);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:14px}.panel h2{font-size:17px;margin:0 0 9px}.sub,.small{font-size:12px;color:var(--muted);line-height:1.5}.market{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}@media(max-width:560px){.market{grid-template-columns:1fr}}.card{background:var(--p2);border:1px solid #454d5b;border-radius:11px;padding:10px;position:relative}.card h3{font-size:15px;margin:0 52px 5px 0}.price{position:absolute;right:9px;top:9px;color:var(--gold);font-weight:800}.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 6px;font-size:11px;margin:2px}.desc{font-size:12px;line-height:1.45;margin-top:6px;color:#d9dde4}button,select{font:inherit}button{background:#2c323e;color:white;border:1px solid #505968;border-radius:8px;padding:7px 9px;cursor:pointer}button:hover{filter:brightness(1.12)}button.primary{background:var(--red)}button:disabled{opacity:.42;cursor:not-allowed}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.base{display:flex;flex-direction:column;gap:7px}.floor{border:1px dashed #555e6d;border-radius:10px;padding:9px;min-height:66px}.floorHead{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}.occupant{font-weight:800}.hand{display:flex;gap:6px;flex-wrap:wrap}.mini{border:1px solid var(--line);background:var(--p2);border-radius:8px;padding:6px 8px;font-size:12px}.selected{outline:2px solid #c84b4b}.log{height:260px;overflow:auto;background:#0b0d11;border:1px solid #292f39;border-radius:9px;padding:8px;font-size:12px;line-height:1.5}.log div{padding:3px 0;border-bottom:1px solid #20252e}.phase{color:#ffce73}.danger{color:#ff8989}.ok{color:#83dda2}.row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.battle{border:1px solid #744;border-radius:10px;padding:9px;background:#211719;margin-top:8px}.battle strong{color:#ffb3b3}.divider{height:1px;background:var(--line);margin:10px 0}.counter{font-weight:800}.modalBack{display:none;position:fixed;inset:0;background:#000a;z-index:20;align-items:center;justify-content:center;padding:18px}.modalBack.open{display:flex}.modal{width:min(620px,100%);max-height:85vh;overflow:auto;background:var(--p);border:1px solid var(--line);border-radius:14px;padding:16px}.modal h2{margin:0 0 10px}.detailGrid{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px}.detailGrid b{color:var(--muted)}.boost{color:var(--boost);font-weight:900}.atkline{font-weight:800}.effectBox{margin-top:8px;padding:7px;border-left:3px solid var(--boost);background:#151d27;font-size:12px;line-height:1.5}
+
+/* v2.6 responsive-only UI: game logic/startup remains shared with PC */
+@media(max-width:760px){
+  header{padding:7px 8px;position:sticky;top:0}
+  .top{gap:6px;align-items:flex-start}
+  h1{font-size:16px;line-height:1.25;width:100%}
+  .stats{gap:4px;width:100%}
+  .pill{font-size:11px;padding:4px 6px}
+  main{padding:7px;gap:8px;display:block}
+  .panel{padding:9px;margin-bottom:8px;border-radius:10px}
+  .panel h2{font-size:15px;margin-bottom:6px}
+  .sub,.small,.desc{font-size:11px;line-height:1.35}
+  .market{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .card{padding:8px;border-radius:9px;min-width:0}
+  .card h3{font-size:13px;margin-right:40px;overflow-wrap:anywhere}
+  .price{font-size:12px;right:7px;top:7px}
+  .tag{font-size:10px;padding:1px 5px}
+  button,select{font-size:14px;min-height:42px;touch-action:manipulation}
+  button{padding:7px 9px}
+  .actions{gap:5px;margin-top:6px}
+  .floor{padding:7px;min-height:58px}
+  .floorHead{margin-bottom:3px}
+  .occupant{font-size:13px}
+  .hand{gap:5px}
+  .mini{font-size:11px;padding:5px 6px}
+  .log{height:180px;font-size:11px}
+  .modalBack{padding:8px}
+  .modal{padding:12px;max-height:88vh}
+  .detailGrid{grid-template-columns:78px 1fr;gap:5px 8px;font-size:12px}
+  [data-detail-kind],[data-log-detail]{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+}
+@media(max-width:380px){
+  .market{grid-template-columns:1fr}
+}
 </style></head><body><header><div class="top"><h1>中小悪の組織 <span class="small">1人テスト版 v1.2</span></h1><div class="stats"><span class="pill money">資金 <b id="money">5</b>万</span><span class="pill vp">VP <b id="vp">0</b>%</span><span class="pill">経過ターン <b id="turnN">0</b></span><span class="pill">襲撃 <b id="raid">4</b></span><span class="pill">戦闘員 <b id="troops">2</b></span><span class="pill">手札 <b id="handN">4</b></span><span class="pill">山札 <b id="deckN">0</b>（襲撃 <b id="raidN">0</b>）</span></div></div></header><main><section>
 <div class="panel"><h2>ターン進行</h2><div id="phaseText" class="sub"></div><div class="row"><button id="drawBtn" class="primary">① 支給カードを引く</button><button id="resolveBtn">② 配置効果を処理</button><button id="hireBtn">③ 戦闘員を雇用（2万）</button><button id="refreshMarketBtn">怪人市場更新（5万・1ターン1回）</button><button id="endBtn">④ ターン終了</button></div><div class="small" style="margin-top:8px">初期手札4枚・資金5万円・戦闘員2体・最下層に首領固定。支給→上層から配置効果→処分→市場更新/購入/雇用→配置変更→終了。初回ターンは襲撃なし。勝利条件100%。</div></div>
 <div class="panel"><h2>怪人市場</h2><div id="market" class="market"></div></div>
@@ -11,7 +45,8 @@
 <div class="panel"><h2>基地（5フロア固定）</h2><div id="base" class="base"></div></div>
 <div class="panel"><h2>襲撃</h2><div id="battleBox" class="small">現在襲撃なし</div></div>
 <div class="panel"><h2>ログ</h2><div id="log" class="log"></div><div class="actions"><button id="resetBtn">ゲームをリセット</button></div></div>
-</section></main><div id="detailBack" class="modalBack" role="dialog" aria-modal="true"><div class="modal"><div class="row" style="justify-content:space-between"><h2 id="detailTitle">カード詳細</h2><button id="detailClose">閉じる</button></div><div id="detailBody"></div></div></div>
+</section></main><div id="v26ForgeryModal" class="modalBack" role="dialog" aria-modal="true"><div class="modal"><h2>贋作：コピー先を選択</h2><div class="small" style="margin-bottom:10px">上下のどちらの怪人の配置効果を使用するか選んでください。</div><div id="v26ForgeryChoices" class="actions"></div></div></div>
+<div id="detailBack" class="modalBack" role="dialog" aria-modal="true"><div class="modal"><div class="row" style="justify-content:space-between"><h2 id="detailTitle">カード詳細</h2><button id="detailClose">閉じる</button></div><div id="detailBody"></div></div></div>
 <script>
 const monsters=[
 ['スパイ',3,[1],4,2,'相手カード公開（ソロでは労働のみ）'],['アイドル',3,[2],4,2,'配信+6%',{vp:6}],['ビジネスマン',3,[3],3,4,'労働4万'],['トレーダー',2,[4],5,2,'労働2万＋支給カード1枚',{draw:1}],['商人',3,[5],5,3,'怪人購入-2万',{merchant:true}],['ゾンビ',3,[1,2],5,1,'敗北時、下層戦闘員をゾンビ化'],['狙撃手',2,[3,4],8,2,'対人手札妨害（ソロでは労働のみ）'],['贋作',2,[5,6],8,0,'隣接階の配置効果をコピー'],['戦闘員の隊長',1,[1,6],12,2,'上層の戦闘員を強化／戦闘員数×2%',{captain:true}],['武士',2,[4,6],8,2,'ヒーロー撤退時+10%',{victoryVp:10}],['騎士',2,[3,5],8,2,'ヒーロー撤退時+10%',{victoryVp:10}],['凡怪人',3,[2,5],7,3,'労働3万'],['不死者',2,[3,6],10,1,'配信+4%／襲撃死亡後復活',{vp:4,undead:true}],['マイティウォリアーシャドウ',2,[1,2,3,4,5,6],5,0,'戦闘後に犠牲',{shadow:true}],['インセクトアーマー ヘラクレス',1,[2,3,4],15,2,'カード・罠効果無効／ギガント無効',{hercules:true}]];
@@ -24,7 +59,7 @@ let S;function makeTroop(){return{id:uid(),name:'戦闘員',atk:[1],price:2,inco
 function refill(){while(S.market.length<4){if(!S.monsterDeck.length&&S.monsterDiscard.length){S.monsterDeck=shuffle(S.monsterDiscard.splice(0));log('怪人捨札をシャッフルして市場山札へ戻した')}if(!S.monsterDeck.length)break;S.market.push(S.monsterDeck.pop())}}function resetMarketAfterRaid(){if(S.pendingRevives&&S.pendingRevives.length){for(const r of S.pendingRevives){if(!S.floors[r.i]){S.floors[r.i]=r.c;log(`${r.c.name}が襲撃終了後に復活`,'ok',r.c)}else{S.reserve.push(r.c);log(`${r.c.name}は元フロアが埋まっているため未配置へ復活`,'ok',r.c)}}S.pendingRevives=[]}if(!S.monsterDiscard)S.monsterDiscard=[];S.monsterDiscard.push(...S.market.splice(0));refill();log('襲撃終了：怪人市場を全リセット')}let logDetailSeq=0,logDetails={};function log(t,cls='',detail=null){let d=document.createElement('div');d.textContent=t;if(cls)d.className=cls;if(detail){let k='L'+(++logDetailSeq);logDetails[k]=JSON.parse(JSON.stringify(detail));d.dataset.logDetail=k;d.title='右クリックでカード詳細'}document.querySelector('#log').prepend(d)}function drawSupply(n=1,opt={}){for(let i=0;i<n;i++){if(!S.supply.length){S.supply=shuffle(S.discard.splice(0));log('支給捨札をシャッフル')};if(!S.supply.length)break;let x=S.supply.pop();if(x.kind==='raidTrigger'){S.discard.push(x);if(opt.effectDraw){S.raid=Math.max(0,S.raid-1);log(`効果ドローで襲撃カードを引いた：襲撃は発生せず、襲撃カウントのみ進行 → ${S.raid}`);continue}if(S.turn===0){S.raid=Math.max(0,S.raid-1);log(`初回ターンに襲撃カードを引いた：初回ターンは襲撃なし。襲撃カウントのみ進行 → ${S.raid}`);continue}S.raid=4;let h=nextHero();triggerRaidCard(h,'襲撃カード')}else{S.hand.push(x);if(opt.countRaid){S.raid=Math.max(0,S.raid-1);log(`襲撃なし：襲撃カウント ${S.raid}`);if(S.raid===0){S.raid=4;triggerRaidCard(nextHero(),'襲撃カウント0')}}}}}
 function triggerRaidIncome(){for(const c of S.floors){if(!c||c.boss)continue;for(const g of c.gear||[])if(g.type==='selfHelp'){S.money+=3;log(`${c.name}の自己啓発本：襲撃発生 +3万円`,'ok',g)}}}function triggerRaidCard(h,source=''){if(!h)return;if(h.falseAlarm){log(`${source}：誤報。襲撃なし`,'ok',h);return}triggerRaidIncome();if(h.gigant){let i=topOccupied();if(i<0){log('ギガント：怪人なし');resetMarketAfterRaid();render();return}let c=S.floors[i];if(c.hercules){log('ギガントをヘラクレスが完全無効化','ok',h);resetMarketAfterRaid();render();return}killAt(i,'ギガント');log(`ギガント：${5-i}Fの怪人を殺害`,'danger',h);resetMarketAfterRaid();render();return}beginHeroRaid(h,source)}
 function startDraw(){if(S.drawn)return;drawSupply(1,{countRaid:true});S.drawn=true;S.phase='effects';render()}function placementTargetsForForgery(fi){let a=[];if(fi>0&&S.floors[fi-1]&&!S.floors[fi-1].boss)a.push({i:fi-1,c:S.floors[fi-1],label:'1つ上'});if(fi<4&&S.floors[fi+1]&&!S.floors[fi+1].boss)a.push({i:fi+1,c:S.floors[fi+1],label:'1つ下'});return a}
-function applyPlacement(c,fi,source='通常',depth=0){if(!c||c.boss)return;let inc=c.income||0;if(c.gear&&c.gear.some(g=>g.type==='book'))inc++;if(c.name==='戦闘員'&&c.gear&&c.gear.some(g=>g.type==='suicideBelt'))inc++;let cap=S.floors.find(x=>x&&x.captain);if(c.name==='戦闘員'&&cap){let ci=S.floors.indexOf(cap);if(fi>ci)inc*=2}if(inc){S.money+=inc;log(`${source}${c.name}：労働 +${inc}万`)}if(c.vp){S.vp+=c.vp;log(`${source}${c.name}：配信 +${c.vp}%`)}if(c.draw){drawSupply(c.draw,{effectDraw:true})}if(c.captain){S.vp+=S.troops*2;log(`${source}隊長：戦闘員${S.troops}体 → +${S.troops*2}%`)}if(c.name==='贋作'&&depth<4){let ts=placementTargetsForForgery(fi);if(!ts.length){log('贋作：コピーできる隣接怪人がいない');return}let pick=ts[0];if(ts.length===2){let ans=prompt(`贋作：どちらの配置効果を使用しますか？\n1=${ts[0].label} ${ts[0].c.name}\n2=${ts[1].label} ${ts[1].c.name}`,'1');pick=ans==='2'?ts[1]:ts[0]}log(`贋作：${pick.label}の「${pick.c.name}」の配置効果を使用`);applyPlacement(pick.c,pick.i,'贋作→',depth+1)}}
+function applyPlacement(c,fi,source='通常',depth=0){if(!c||c.boss)return;let inc=c.income||0;if(c.gear&&c.gear.some(g=>g.type==='book'))inc++;if(c.name==='戦闘員'&&c.gear&&c.gear.some(g=>g.type==='suicideBelt'))inc++;let cap=S.floors.find(x=>x&&x.captain);if(c.name==='戦闘員'&&cap){let ci=S.floors.indexOf(cap);if(fi>ci)inc*=2}if(inc){S.money+=inc;log(`${source}${c.name}：労働 +${inc}万`)}if(c.vp){S.vp+=c.vp;log(`${source}${c.name}：配信 +${c.vp}%`)}if(c.draw){drawSupply(c.draw,{effectDraw:true})}if(c.captain){S.vp+=S.troops*2;log(`${source}隊長：戦闘員${S.troops}体 → +${S.troops*2}%`)}if(c.name==='贋作'&&depth<4){let ts=placementTargetsForForgery(fi);if(!ts.length){log('贋作：コピーできる隣接怪人がいない');return}if(ts.length===2){v26ChooseForgery(ts,depth);return}let pick=ts[0];log(`贋作：${pick.label}の「${pick.c.name}」の配置効果を使用`);applyPlacement(pick.c,pick.i,'贋作→',depth+1)}}
 function resolveEffects(){if(!S.drawn){log('先に支給カードを引いてください');return}if(S.resolved)return;for(let f=0;f<5;f++){let c=S.floors[f];if(c){if(c.boss){S.money+=1;S.vp+=1;log('首領：1万円獲得／勝利点+1%')}else applyPlacement(c,f)}}S.resolved=true;S.phase='action';render()}
 function refreshMarketPaid(){if(S.battle){log('襲撃中は市場更新できません');return}if(S.marketRefreshed){log('怪人市場の有料更新は1ターンに1回まで');return}if(S.money<5){log('怪人市場更新：5万円必要');return}S.money-=5;S.monsterDiscard.push(...S.market.splice(0));refill();S.marketRefreshed=true;log('5万円支払い：怪人市場を全更新','ok');render()}function hire(){if(S.money<2){log('戦闘員雇用：資金不足');return}S.money-=2;S.troops++;S.reserve.push(makeTroop());log('戦闘員を2万円で雇用');render()}function merchantDiscount(){return S.floors.filter(c=>c&&c.merchant).length*2}function priceInfo(c){let base=c.price,merchant=merchantDiscount(),afterMerchant=Math.max(0,base-merchant),afterCoupon=Math.max(0,afterMerchant-(S.coupon||0)),final=S.half?Math.ceil(afterCoupon/2):afterCoupon;let parts=[`${base}万`];if(merchant)parts.push(`商人-${merchant}万`);if(S.coupon)parts.push(`クーポン-${S.coupon}万`);if(S.half)parts.push('半額');return{final,detail:parts.join(' → ')}}function buy(id){let i=S.market.findIndex(x=>x.id===id);if(i<0)return;let c=S.market[i],pi=priceInfo(c),p=pi.final;if(S.money<p){log(`資金不足：${c.name} ${pi.detail} = ${p}万円`);return}S.money-=p;S.coupon=0;S.half=false;S.reserve.push(c);S.market.splice(i,1);refill();log(`${c.name}購入：${pi.detail} = ${p}万円`,'ok',c);render()}function selectReserve(id){S.selected={where:'reserve',id};render()}function selectFloor(i){let c=S.floors[i];if(c&&c.boss){S.selected=null;log('首領は最下層に固定されています');render();return}if(S.selected&&S.selected.where==='reserve'&&!c){let ri=S.reserve.findIndex(x=>x.id===S.selected.id),x=S.reserve.splice(ri,1)[0];S.floors[i]=x;S.selected=null;log(`${x.name}を${5-i}Fへ配置`);render();return}if(S.selected&&S.selected.where==='floor'&&S.selected.i!==i){let a=S.selected.i;[S.floors[a],S.floors[i]]=[S.floors[i],S.floors[a]];S.selected=null;log('配置を変更');render();return}if(c){S.selected={where:'floor',i};render()}}
 function effectiveAttackNums(c,fi){if(!c||!c.atk)return[];let nums=[...c.atk];if(c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap);if(fi<ci){let fighterFloor=5-fi;let add=fighterFloor===1?2:fighterFloor===2?3:fighterFloor===3?4:null;if(add&&!nums.includes(add))nums.push(add)}}}for(const g of c.gear||[]){if(g.type==='shield'&&!nums.includes(g.val))nums.push(g.val);if(g.type==='suicideBelt')for(const n of [2,3])if(!nums.includes(n))nums.push(n)}return nums.sort()}function heroRank(h){if(!h||h.gigant||h.falseAlarm)return'';if(h.name==='脅威度C')return'C';if(h.name==='脅威度B')return'B';const s=['マイティウォリアーX','アイ・アンペインマン','ギガントロボ','デスソニックニンジャ','インセクトアーマー ギラファス','改造人間7号'];return s.includes(h.name)?'S':'A'}function heroLabel(h){let r=heroRank(h);return r?`脅威度${r}｜${h.name}`:h.name}function soloOriginalText(name){return {'偽装工作':'10万円支払い、相手の襲撃カウントを0にする。','妨害工作':'5万円支払い、相手の装備カードを1枚破壊する。','妨害工作2':'5万円支払い、相手の襲撃カウントを1進める。','破壊工作2':'2万円支払い、相手の手札をランダムに1枚捨てさせる。'}[name]||'対戦相手を対象にする効果。'}
@@ -54,7 +89,7 @@ function endTurn(){if(!S.drawn){log('支給カードを引いてから終了し�
 function topOccupied(){return S.floors.findIndex(c=>c&&!c.boss)}function nextHero(){if(!S.raidDeck.length)S.raidDeck=makeRaid();return S.raidDeck.pop()}function beginHeroRaid(h,source=''){S.battle={hero:h,floor:topOccupied(),rolls:0,prev:null,smoke:false};if(h.destroyTop){let i=topOccupied();if(i>=0&&!S.floors[i].hercules){killAt(i,'ギガントロボの効果');log('ギガントロボ：最上層怪人を1体破壊','danger');S.battle.floor=topOccupied()}}log(`${source?source+'：':''}${heroLabel(h)} 襲撃【${h.atk.join('・')}】`,'danger',h);render()}
 function startRaid(){triggerRaidCard(randomRaidCard(),'強制襲撃')}
 function killAt(i,reason){let c=S.floors[i];if(!c)return;if(c.name==='ゾンビ'&&i<3){let below=S.floors[i+1];if(below&&below.troop&&confirm('ゾンビの効果：1つ下の戦闘員をゾンビ【1・2】にしますか？')){let z=makeMonsterDeck().find(x=>x.name==='ゾンビ');if(z){z.id=uid();z.gear=below.gear||[];S.floors[i+1]=z;S.troops=Math.max(0,S.troops-1);log('ゾンビ効果：下層の戦闘員【1】をゾンビ【1・2】へ変化','ok',z)}}}let sub=c.gear.findIndex(g=>g.type==='substitute');if(sub>=0){let g=c.gear.splice(sub,1)[0];S.discard.push(g);log(`${c.name}：身代わりで死亡回避`);return false}if(c.gear.some(g=>g.type==='insurance')){S.money+=5;log('死亡保険 +5万円')}S.floors[i]=null;if(c.undead){S.pendingRevives=S.pendingRevives||[];S.pendingRevives.push({i,c});log(`${c.name}：襲撃終了後に復活予定`)}if(c.troop)S.troops=Math.max(0,S.troops-1);log(`${c.name}が殺害された（${reason}）`,'danger');return true}
-function battleRoll(){let b=S.battle;if(!b)return;let h=b.hero,i=topOccupied();b.floor=i;if(i<0){log(`${h.name}が首領まで到達。テスト敗北！`,'danger',h);S.battle=null;resetMarketAfterRaid();render();return}let c=S.floors[i];if(h.breakGear&&!c.hercules&&c.gear.length){let g=c.gear.shift();S.discard.push(g);log(`${h.name}が${c.name}の${g.name}を破壊`)}if(h.discardEach&&!c.hercules&&S.hand.length){let k=Math.floor(Math.random()*S.hand.length);let x=S.hand.splice(k,1)[0];S.discard.push(x);log(`デスソニック：手札「${x.name}」を破棄`)}let r=1+Math.floor(Math.random()*6);b.rolls++;let monsterAtk=[...c.atk];for(const g of (h.immune?[]:c.gear))if(g.type==='shield'&&!monsterAtk.includes(g.val))monsterAtk.push(g.val);if(c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap),steps=ci-i;let add=steps===1?2:steps===2?3:steps>=3?4:null;if(add&&!monsterAtk.includes(add))monsterAtk.push(add)}}if(!h.immune&&c.gear.some(g=>g.type==='suicideBelt'))for(const x of [2,3])if(!monsterAtk.includes(x))monsterAtk.push(x);let heroHit=h.atk.includes(r),monsterHit=monsterAtk.includes(r);if(b.smoke){heroHit=false;b.smoke=false;log('煙幕：このロールのヒーロー攻撃判定を無効化')}let lethal=!c.hercules&&(h.alwaysLethal||h.lethal===r||(h.sum7&&b.prev!==null&&b.prev+r===7));log(`戦闘 ${heroLabel(h)} vs ${c.name}：🎲${r}｜H:${heroHit?'攻撃':'-'} M:${monsterHit?'攻撃':'-'}`,'',[h,c]);b.prev=r;if(lethal){killAt(i,'必殺');advanceRaid();return}if(heroHit&&!monsterHit){let killed=killAt(i,'戦闘敗北');if(killed&&h.cashKill&&!c.hercules){let pay=Math.min(S.money,h.cashKill);S.money-=pay;log(`改造人間6号：${pay}万円支払い`)}advanceRaid();return}if(monsterHit){heroRetreat(c);return}if(h.maxRoll&&b.rolls>=h.maxRoll){log('マシンマン：4回ロールで自動撤収','ok');heroRetreat(c);return}render()}
+function battleRoll(){let b=S.battle;if(!b)return;let h=b.hero,i=topOccupied();b.floor=i;if(i<0){log(`${h.name}が首領まで到達。テスト敗北！`,'danger',h);S.battle=null;resetMarketAfterRaid();render();return}let c=S.floors[i];if(h.breakGear&&!c.hercules&&c.gear.length){let g=c.gear.shift();S.discard.push(g);log(`${h.name}が${c.name}の${g.name}を破壊`)}if(h.discardEach&&!c.hercules&&S.hand.length){let k=Math.floor(Math.random()*S.hand.length);let x=S.hand.splice(k,1)[0];S.discard.push(x);log(`デスソニック：手札「${x.name}」を破棄`)}let r=1+Math.floor(Math.random()*6);b.rolls++;let monsterAtk=[...c.atk];for(const g of (h.immune?[]:c.gear))if(g.type==='shield'&&!monsterAtk.includes(g.val))monsterAtk.push(g.val);if(c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap);if(i<ci){let fighterFloor=5-i;let add=fighterFloor===1?2:fighterFloor===2?3:fighterFloor===3?4:null;if(add&&!monsterAtk.includes(add))monsterAtk.push(add)}}}if(!h.immune&&c.gear.some(g=>g.type==='suicideBelt'))for(const x of [2,3])if(!monsterAtk.includes(x))monsterAtk.push(x);let heroHit=h.atk.includes(r),monsterHit=monsterAtk.includes(r);if(b.smoke){heroHit=false;b.smoke=false;log('煙幕：このロールのヒーロー攻撃判定を無効化')}let lethal=!c.hercules&&(h.alwaysLethal||h.lethal===r||(h.sum7&&b.prev!==null&&b.prev+r===7));log(`戦闘 ${heroLabel(h)} vs ${c.name}：🎲${r}｜H:${heroHit?'攻撃':'-'} M:${monsterHit?'攻撃':'-'}`,'',[h,c]);b.prev=r;if(lethal){killAt(i,'必殺');advanceRaid();return}if(heroHit&&!monsterHit){let killed=killAt(i,'戦闘敗北');if(killed&&h.cashKill&&!c.hercules){let pay=Math.min(S.money,h.cashKill);S.money-=pay;log(`改造人間6号：${pay}万円支払い`)}advanceRaid();return}if(monsterHit){heroRetreat(c);return}if(h.maxRoll&&b.rolls>=h.maxRoll){log('マシンマン：4回ロールで自動撤収','ok');heroRetreat(c);return}render()}
 function advanceRaid(){if(!S.battle)return;let i=topOccupied();if(i<0){let h=S.battle.hero;log('ヒーローが首領まで到達。テスト敗北！','danger',h);S.battle=null;resetMarketAfterRaid()}else{log(`ヒーローは次のフロアへ進行`)}render()}function heroRetreat(c){let bonus=10,parts=['ヒーロー撃退 +10%'];if(c.victoryVp){bonus+=c.victoryVp;parts.push(`${c.name}効果 +${c.victoryVp}%`)}if(c.gear&&c.gear.some(g=>g.type==='sword')){bonus+=10;parts.push('剣 +10%')}S.vp+=bonus;log(`VP獲得：${parts.join(' / ')} = +${bonus}%`,'ok');if(c.gear){for(let j=c.gear.length-1;j>=0;j--){let g=c.gear[j];if(g.type==='shield'){let last=S.battle.prev;if(g.val===last){c.gear.splice(j,1);S.discard.push(g);log(`${g.name}を破壊`)}}if(g.type==='suicideBelt'){killAt(S.floors.indexOf(c),'自爆ベルト');break}}}if(c.shadow){let ci=S.floors.indexOf(c);if(ci>=0)killAt(ci,'戦闘後の犠牲')}let endedHero=S.battle.hero;log(`${endedHero.name}を撤退させた`,'ok',endedHero);S.battle=null;resetMarketAfterRaid();render();checkWin()}
 function useTrap(id){if(!S.battle)return;let i=S.hand.findIndex(x=>x.id===id);if(i<0)return;let c=S.hand[i],h=S.battle.hero,fi=topOccupied(),m=fi>=0?S.floors[fi]:null;if(!m)return;if(m.hercules){log('ヘラクレスは罠カードの効果を受けない');return}if(h.immune){log(`${h.name}は罠カードの効果を受けない`);return}let extra=h.trapCost||0;if(extra&&S.money<extra){log(`罠使用に${extra}万円必要`);return}if(extra)S.money-=extra;if(c.type==='trapSmoke'){S.battle.smoke=true;log('煙幕：次のロールでヒーロー攻撃判定を無効（簡易実装）')}else if(c.type==='trapReinforce'){if(S.battle.rolls<3){log('増援は3ターン経過後に使用可能');return}else{S.hand.splice(i,1);S.discard.push(c);heroRetreat(m);return}}else if(c.type==='trapBomb'){S.hand.splice(i,1);S.discard.push(c);killAt(fi,'自爆罠');let endedHero=S.battle.hero;log('自爆：勝利点なしでヒーロー撤退','ok',endedHero);S.battle=null;resetMarketAfterRaid();render();return}S.hand.splice(i,1);S.discard.push(c);render()}
 function heroText(h){if(!h)return[];let rows=[['分類',h.gigant?'特殊襲撃':h.falseAlarm?'誤報':'ヒーロー']];let rank=heroRank(h);if(rank)rows.push(['脅威度',rank]);if(h.atk)rows.push(['攻撃判定',h.atk.join('・')]);let t='';if(h.falseAlarm)t='襲撃は発生しない。';else if(h.gigant)t='最上階層を戦闘前効果を無視して壊滅させ、配置怪人を殺害する。ヘラクレスが配置されている場合はフロアを含めて無効。';else if(h.name==='脅威度C')t='攻撃判定はこのカード生成時にランダムな数字2つで決定する。';else if(h.name==='脅威度B')t='攻撃判定はこのカード生成時にランダムな数字3つで決定する。';else {const m={'マシンマン':'4回ダイスをロールしたら自動で撤収する。','改造人間6号':'相手怪人を殺害する度に4万円支払わせる。所持金は0未満にならない。ヘラクレス相手には発生しない。','大白田 剣持郎':'ダイスロール前に相手の装備カードを破壊する。','アンペインマン':'2が出た場合、相手の攻撃判定を無視して殺害する。','キャプテンジーニアス':'4が出た場合、相手の攻撃判定を無視して殺害する。','フレイムマン':'6が出た場合、相手の攻撃判定を無視して殺害する。','ソニックニンジャ':'1が出た場合、相手の攻撃判定を無視して殺害する。','インセクトアーマー スタッグ':'必殺：3が出た場合、相手の攻撃判定を無視して殺害する。','デスレッド':'5が出た場合、相手の攻撃判定を無視して殺害する。','マイティウォリアーX':'罠カード・装備カードの効果を受けない。','アイ・アンペインマン':'このカードは相手の攻撃判定を無視して殺害する。','ギガントロボ':'相手の最上層カードを1枚破壊する。','デスソニックニンジャ':'ダイスを振るたびに相手の手札を1枚ランダムに捨てさせる。','インセクトアーマー ギラファス':'相手が罠カードを使用するなら5万円支払わなければ発動できない。','改造人間7号':'前回振ったダイスと今回振ったダイスの合計が7だった場合、相手カードの効果を無視して殺害する。'};t=m[h.name]||'特殊効果なし。'}rows.push(['カード本文',t]);return rows}function cardText(c){if(!c)return'';if(c.gigant||c.falseAlarm||c.kind==='raid'||heroDefs.some(h=>h.name===c.name))return heroText(c);let rows=[];let kind=c.kind==='event'?'イベント':c.kind==='gear'?'装備':c.kind==='trap'?'罠':c.kind==='white'?'打ち消し':c.boss?'首領':c.troop?'戦闘員':'怪人';rows.push(['分類',kind]);if(c.atk&&c.atk.length)rows.push(['攻撃判定',c.atk.join('・')]);if(c.price!=null&&!c.boss)rows.push(['価格/雇用',`${c.price}万円`]);let txt=c.text||'';if(c.kind==='event'){const map={vp:`勝利点を${c.val}%獲得する。`,money:`${c.val}万円獲得する。`,draw:`手札を${c.val}枚引く。`,coupon:`怪人購入費を${c.val}万円引く。`,half:'怪人購入費を半額にする。',raidReset:'自分の襲撃カウントを4に戻す。',salvage:'5万円支払う。捨札にあるカードを回収する。',solo:`本来の効果：${soloOriginalText(c.name)}\n【1人テスト】対戦相手が存在しないため、この効果は発生しない。カード自体は使用して捨札へ送ることができる。`};txt=map[c.type]||txt}if(c.kind==='gear'||c.kind==='trap'||c.kind==='white'){const map={shield:`攻撃判定に${c.val}を追加する。${c.val}でバトルに勝利した場合、このカードを破壊する。`,suicideBelt:'戦闘員に装備。攻撃判定に2・3を加え、戦闘終了後に勝敗問わず戦闘員を犠牲にする。戦闘員の労働+1万円。',sword:'装備怪人がヒーローに勝利した場合、勝利点+10%（VP2倍ルール適用）。',substitute:'装備カードがバトルで殺害される場合、代わりにこのカードを破壊する。',insurance:'装備怪人がヒーローに殺害された時、5万円獲得する。',book:'装備カードの労働+1万円。',selfHelp:'襲撃が発生する度に3万円獲得する。',trapSmoke:'最初のターンのみ、相手の攻撃判定が発生しない。',trapReinforce:'このフロアで3ターン経過しているなら相手を撤退させる。',trapBomb:'フロアの怪人を装備ごと犠牲にして相手を撤退させる。この戦闘で勝利点は得られない。',white:`相手がカードを使用するタイミングで使用。装備カードには使用不可。相手のカード効果を無効化して破壊する。使用コスト${c.val}万円。`};txt=map[c.type]||txt}if(!c.kind&&!c.boss){const mm={
@@ -540,4 +575,74 @@ applyPlacement=function(c,fi,source='通常',depth=0){
 v25Status();
 </script>
 
+
+<script>
+/* ===== v2.6 rule + mobile interaction integration on verified v2.5 base ===== */
+(function(){
+  'use strict';
+
+  // Undead: if death actually occurs, all equipment is lost before revival.
+  // Substitute still prevents death and therefore does not trigger this loss.
+  killAt=function(i,reason){
+    let c=S.floors[i];if(!c)return;
+    if(c.name==='ゾンビ'&&i<3){let below=S.floors[i+1];if(below&&below.troop&&confirm('ゾンビの効果：1つ下の戦闘員をゾンビ【1・2】にしますか？')){let z=makeMonsterDeck().find(x=>x.name==='ゾンビ');if(z){z.id=uid();z.gear=below.gear||[];S.floors[i+1]=z;S.troops=Math.max(0,S.troops-1);log('ゾンビ効果：下層の戦闘員【1】をゾンビ【1・2】へ変化','ok',z)}}}
+    let sub=(c.gear||[]).findIndex(g=>g.type==='substitute');
+    if(sub>=0){let g=c.gear.splice(sub,1)[0];S.discard.push(g);log(`${c.name}：身代わりで死亡回避`);return false}
+    if((c.gear||[]).some(g=>g.type==='insurance')){S.money+=5;log('死亡保険 +5万円')}
+    if(c.undead && c.gear && c.gear.length){
+      const lost=c.gear.splice(0);S.discard.push(...lost);
+      log(`不死者：死亡により装備${lost.length}枚をすべて失った`,'danger');
+    }
+    S.floors[i]=null;
+    if(c.undead){S.pendingRevives=S.pendingRevives||[];S.pendingRevives.push({i,c});log(`${c.name}：装備なしで襲撃終了後に復活予定`)}
+    if(c.troop)S.troops=Math.max(0,S.troops-1);
+    log(`${c.name}が殺害された（${reason}）`,'danger');return true;
+  };
+
+  // Forgery choice modal. Only invoked when both adjacent targets are legal.
+  window.v26ChooseForgery=function(ts,depth){
+    const modal=document.getElementById('v26ForgeryModal');
+    const box=document.getElementById('v26ForgeryChoices');
+    if(!modal||!box||!ts||ts.length<2)return;
+    box.innerHTML='';
+    ts.forEach((pick)=>{
+      const b=document.createElement('button');b.type='button';b.className='primary';
+      b.textContent=`${pick.label}：${pick.c.name}`;
+      b.onclick=()=>{modal.classList.remove('open');log(`贋作：${pick.label}の「${pick.c.name}」の配置効果を使用`);applyPlacement(pick.c,pick.i,'贋作→',(depth||0)+1);render()};
+      box.appendChild(b);
+    });
+    modal.classList.add('open');
+  };
+
+  function detailObject(el){
+    const k=el.dataset.detailKind,id=el.dataset.detailId;
+    if(k==='market')return S.market.find(x=>x.id===id);
+    if(k==='reserve')return S.reserve.find(x=>x.id===id);
+    if(k==='hand')return S.hand.find(x=>x.id===id);
+    if(k==='floor')return S.floors[+id];
+    if(k==='hero')return S.battle&&S.battle.hero;
+    return null;
+  }
+  function bindOneLongPress(el,getObj){
+    let timer=null,longFired=false,startX=0,startY=0;
+    const clear=()=>{if(timer){clearTimeout(timer);timer=null}};
+    el.oncontextmenu=e=>{e.preventDefault();const c=getObj();if(c)showDetail(c)};
+    el.onpointerdown=e=>{
+      if(e.pointerType==='mouse')return;
+      longFired=false;startX=e.clientX;startY=e.clientY;clear();
+      timer=setTimeout(()=>{timer=null;longFired=true;const c=getObj();if(c)showDetail(c)},520);
+    };
+    el.onpointermove=e=>{if(Math.abs(e.clientX-startX)>12||Math.abs(e.clientY-startY)>12)clear()};
+    el.onpointerup=clear;el.onpointercancel=clear;el.onpointerleave=clear;
+    el.addEventListener('click',e=>{if(longFired){e.preventDefault();e.stopImmediatePropagation();longFired=false}},true);
+  }
+  bindDetails=function(){
+    document.querySelectorAll('[data-detail-kind]').forEach(el=>bindOneLongPress(el,()=>detailObject(el)));
+    document.querySelectorAll('#log [data-log-detail]').forEach(el=>bindOneLongPress(el,()=>logDetails[el.dataset.logDetail]));
+  };
+
+  // Rebind the currently rendered screen once; later renders use the new bindDetails.
+  bindDetails();
+})();
+</script>
 </body></html>

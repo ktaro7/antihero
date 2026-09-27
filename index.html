@@ -86,7 +86,7 @@
 <div id="detailBack" class="modalBack" role="dialog" aria-modal="true"><div class="modal"><div class="row" style="justify-content:space-between"><h2 id="detailTitle">カード詳細</h2><button id="detailClose">閉じる</button></div><div id="detailBody"></div></div></div>
 <script>
 const monsters=[
-['スパイ',3,[1],4,2,'相手カード公開（ソロでは労働のみ）'],['アイドル',3,[2],4,2,'配信+5%',{vp:5}],['ビジネスマン',3,[3],3,4,'労働4万'],['トレーダー',2,[4],5,2,'労働2万＋支給カード1枚',{draw:1}],['商人',3,[5],5,3,'怪人購入-2万',{merchant:true}],['ゾンビ',3,[1,2],5,1,'敗北時、下層戦闘員をゾンビ化'],['狙撃手',2,[3,4],8,2,'対人手札妨害（ソロでは労働のみ）'],['贋作',2,[5,6],8,0,'隣接階の配置効果をコピー'],['戦闘員の隊長',1,[1,6],20,2,'上層の戦闘員を強化／戦闘員数×2%',{captain:true}],['武士',2,[4,6],8,2,'ヒーロー撤退時+10%',{victoryVp:10}],['騎士',2,[3,5],8,2,'ヒーロー撤退時+10%',{victoryVp:10}],['凡怪人',3,[2,5],7,3,'労働3万'],['不死者',2,[3,6],10,1,'配信+4%／襲撃死亡後復活',{vp:4,undead:true}],['マイティウォリアーシャドウ',2,[1,2,3,4,5,6],7,0,'戦闘後に犠牲',{shadow:true}],['インセクトアーマー ヘラクレス',1,[2,3,4],25,2,'カード・罠効果無効／ギガント無効',{hercules:true}]];
+['スパイ',3,[1],4,2,'相手カード公開（ソロでは労働のみ）'],['アイドル',3,[2],4,2,'配信+5%',{vp:5}],['ビジネスマン',3,[3],3,4,'労働4万'],['トレーダー',2,[4],5,2,'労働2万＋支給カード1枚',{draw:1}],['商人',3,[5],5,3,'怪人購入-2万',{merchant:true}],['ゾンビ',3,[1,2],5,1,'敗北時、下層戦闘員をゾンビ化'],['狙撃手',2,[3,4],8,2,'対人手札妨害（ソロでは労働のみ）'],['贋作',2,[5,6],8,0,'隣接階の配置効果をコピー'],['戦闘員の隊長',1,[1,6],20,2,'隊長より階数が大きいフロアの戦闘員を強化／戦闘員数×2%',{captain:true}],['武士',2,[4,6],8,2,'ヒーロー撤退時+10%',{victoryVp:10}],['騎士',2,[3,5],8,2,'ヒーロー撤退時+10%',{victoryVp:10}],['凡怪人',3,[2,5],7,3,'労働3万'],['不死者',2,[3,6],10,1,'配信+4%／襲撃死亡後復活',{vp:4,undead:true}],['マイティウォリアーシャドウ',2,[1,2,3,4,5,6],7,0,'戦闘後に犠牲',{shadow:true}],['インセクトアーマー ヘラクレス',1,[2,3,4],25,2,'カード・罠効果無効／ギガント無効',{hercules:true}]];
 const eventDefs=[['勝利点4%',5,'vp',4],['勝利点10%',3,'vp',10],['勝利点20%',2,'vp',20],['1万円獲得',10,'money',1],['2万円獲得',8,'money',2],['3万円獲得',5,'money',3],['5万円獲得',2,'money',5],['手札を2枚引く',3,'draw',2],['手札を3枚引く',2,'draw',3],['怪人3万円引き',5,'coupon',3],['怪人5万円引き',3,'coupon',5],['怪人半額',1,'half'],['撹乱作戦',7,'raidReset'],['鹵獲作戦',3,'salvage'],['偽装工作',2,'solo'],['妨害工作',4,'solo'],['妨害工作2',3,'solo'],['破壊工作2',3,'solo']];
 const gearDefs=[['盾1',1,'shield',1],['盾2',1,'shield',2],['盾3',1,'shield',3],['盾4',1,'shield',4],['盾5',1,'shield',5],['盾6',1,'shield',6],['自爆ベルト',3,'suicideBelt'],['剣',2,'sword'],['身代わり',2,'substitute'],['死亡保険',3,'insurance'],['ビジネス書',3,'book'],['自己啓発本',2,'selfHelp'],['煙幕',7,'trapSmoke'],['増援',3,'trapReinforce'],['自爆',2,'trapBomb']];
 const heroDefs=[
@@ -150,7 +150,7 @@ function showDetail(c){if(!c)return;if(Array.isArray(c)){detailTitle.textContent
 function bindDetails(){document.querySelectorAll('[data-detail-kind]').forEach(el=>el.addEventListener('contextmenu',e=>{e.preventDefault();let k=el.dataset.detailKind,id=el.dataset.detailId,c=null;if(k==='market')c=S.market.find(x=>x.id===id);else if(k==='reserve')c=S.reserve.find(x=>x.id===id);else if(k==='hand')c=S.hand.find(x=>x.id===id);else if(k==='floor')c=S.floors[+id];else if(k==='hero')c=S.battle&&S.battle.hero;showDetail(c)}));document.querySelectorAll('#log [data-log-detail]').forEach(el=>el.oncontextmenu=e=>{e.preventDefault();showDetail(logDetails[el.dataset.logDetail])})}
 function checkWin(){if(S.vp>=100)log('★★ 勝利点100%到達！ゲーム勝利 ★★','ok')}
 function attackDisplay(c,i){if(!c||!c.atk)return'';let base=[...c.atk],extra=[];if(c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap);if(i<ci){let fighterFloor=5-i;let add=fighterFloor>=1&&fighterFloor<=4?fighterFloor+1:null;if(add&&!base.includes(add))extra.push({n:add,src:'戦闘員の隊長'})}}}for(const g of c.gear||[]){if(g.type==='shield'&&!base.includes(g.val)&&!extra.some(e=>e.n===g.val))extra.push({n:g.val,src:g.name});if(g.type==='suicideBelt')for(const n of [2,3])if(!base.includes(n)&&!extra.some(e=>e.n===n))extra.push({n,src:'自爆ベルト'})}return base.join('・')+(extra.length?'・'+extra.map(e=>`<span class="boost" title="${e.src}で追加">${e.n}</span>`).join('・'):'')}
-function activeEffects(c,i){let a=[];if(c&&c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap);if(i<ci){let fighterFloor=5-i;let add=fighterFloor>=1&&fighterFloor<=4?fighterFloor+1:null;if(add)a.push(`隊長より上層かつ戦闘員自身が${fighterFloor}Fのため攻撃判定 <span class="boost">${add}</span> 追加`)}if(i>ci)a.push('隊長より下層のため労働金額4倍')}}for(const g of c?.gear||[]){if(g.type==='shield')a.push(`${g.name}により攻撃判定 <span class="boost">${g.val}</span> 追加`);if(g.type==='suicideBelt')a.push(`自爆ベルトにより攻撃判定 <span class="boost">2・3</span> 追加／労働+1万`);if(g.type==='book')a.push('ビジネス書により労働+1万')}return a}
+function activeEffects(c,i){let a=[];if(c&&c.troop){let cap=S.floors.find(x=>x&&x.captain);if(cap){let ci=S.floors.indexOf(cap);if(i<ci){let fighterFloor=5-i;let add=fighterFloor>=1&&fighterFloor<=4?fighterFloor+1:null;if(add)a.push(`隊長より階数が大きいフロア（${fighterFloor}F）の戦闘員：攻撃判定 <span class="boost">${add}</span> 追加`)}if(i>ci)a.push('隊長より階数が小さいフロアのため労働金額4倍')}}for(const g of c?.gear||[]){if(g.type==='shield')a.push(`${g.name}により攻撃判定 <span class="boost">${g.val}</span> 追加`);if(g.type==='suicideBelt')a.push(`自爆ベルトにより攻撃判定 <span class="boost">2・3</span> 追加／労働+1万`);if(g.type==='book')a.push('ビジネス書により労働+1万')}return a}
 function render(){money.textContent=S.money;vp.textContent=S.vp;turnN.textContent=S.turn||0;raid.textContent=S.raid;troops.textContent=S.troops;handN.textContent=S.hand.length;deckN.textContent=S.supply.length;raidN.textContent=S.supply.filter(x=>x.kind==='raidTrigger').length;phaseText.innerHTML=`現在：<span class="phase">${S.battle?'襲撃戦闘中':S.phase==='ready'?'ゲーム開始準備完了':S.phase==='supply'?'支給フェイズ':S.phase==='effects'?'配置効果フェイズ':'行動フェイズ'}</span>`;drawBtn.disabled=S.drawn||!!S.battle;resolveBtn.disabled=!S.drawn||S.resolved||!!S.battle;hireBtn.disabled=!!S.battle;let rmb=document.querySelector('#refreshMarketBtn');if(rmb)rmb.disabled=!!S.battle||S.marketRefreshed||S.money<10;let pdb=document.querySelector('#paidDrawBtn');if(pdb)pdb.disabled=!!S.battle||S.paidDrawUsed||S.money<5;let ra1=document.querySelector('#raidAdvanceBtn'),ra2=document.querySelector('#raidDelayBtn');if(ra1)ra1.disabled=!!S.battle||S.raidAdjustUsed||S.money<5;if(ra2)ra2.disabled=!!S.battle||S.raidAdjustUsed||S.money<5;endBtn.disabled=!!S.battle;market.innerHTML=S.market.map(c=>{let pi=priceInfo(c),mark=(c.name||'怪').replace(/[\s・]/g,'').slice(0,2);return `<div class="card monsterCard" data-detail-kind="market" data-detail-id="${c.id}"><div class="monsterArt"><div class="monsterArtMark">${mark}</div><div class="monsterCardName">${c.name}</div></div><div class="monsterBuyRow"><div class="monsterCardPrice">${pi.final}万円</div><div class="monsterBuy"><button class="primary" data-buy="${c.id}">購入</button></div></div></div>`}).join('');let mm=document.getElementById('marketMoney');if(mm)mm.textContent=`所持金 ${S.money}万円`;reserve.innerHTML=S.reserve.length?S.reserve.map(c=>`<button class="${S.selected&&S.selected.where==='reserve'&&S.selected.id===c.id?'selected':''}" data-res="${c.id}" data-detail-kind="reserve" data-detail-id="${c.id}">${c.name}【${c.atk.join('.')}】</button>`).join(''):'<span class="small">なし</span>';let reservePanel=document.querySelector('#reservePanel');if(reservePanel)reservePanel.style.display=S.reserve.length?'':'none';eventHand.innerHTML=S.hand.filter(c=>c.kind==='event').map(c=>`<button data-card="${c.id}" data-detail-kind="hand" data-detail-id="${c.id}">${c.name}</button>`).join('')||'<span class="small">なし</span>';gearHand.innerHTML=S.hand.filter(c=>c.kind!=='event').map(c=>`<button data-card="${c.id}" data-trap="${c.kind==='trap'||c.kind==='white'?1:0}" data-detail-kind="hand" data-detail-id="${c.id}">${c.name}</button>`).join('')||'<span class="small">なし</span>';base.innerHTML=S.floors.map((c,i)=>`<div class="floor ${S.selected&&S.selected.where==='floor'&&S.selected.i===i?'selected':''}" data-floor="${i}" ${c?`data-detail-kind="floor" data-detail-id="${i}"`:''}><div class="floorHead"><span>${5-i}F</span><span>${c&&c.boss?'首領固定':''}</span></div>${c?`<span class="occupant">${c.name}</span>${c.boss?'':` <span class="tag atkline">攻撃 ${attackDisplay(c,i)}</span>`}<div class="small">${c.boss?'通常カード配置不可':`装備：${c.gear.length?c.gear.map(g=>g.name).join(' / '):'なし'}`}</div>${!c.boss&&activeEffects(c,i).length?`<div class="effectBox">${activeEffects(c,i).join('<br>')}</div>`:''}${!c.boss?`<div class="actions"><button type="button" class="disposeBtn" data-dispose="${i}" onclick="event.stopPropagation();disposeFloor(${i})">処分</button></div>`:''}`:'<span class="small">空き</span>'}</div>`).join('');if(S.battle){let h=S.battle.hero;let trapBtns=S.hand.filter(c=>c.kind==='trap').map(c=>`<button data-use-trap="${c.id}">${c.name}</button>`).join('');battleBox.innerHTML=`<div class="battle" data-detail-kind="hero" data-detail-id="current"><strong>${heroLabel(h)}</strong>　攻撃【${h.atk.join('.')}】<br>ロール回数 ${S.battle.rolls}<div class="actions"><button class="primary" id="rollBattle">ダイスを振る</button>${trapBtns}</div></div>`}else battleBox.textContent='現在襲撃なし';document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buy(b.dataset.buy));document.querySelectorAll('[data-res]').forEach(b=>b.onclick=()=>selectReserve(b.dataset.res));document.querySelectorAll('[data-floor]').forEach(b=>b.onclick=()=>selectFloor(+b.dataset.floor));document.querySelectorAll('[data-card]').forEach(b=>b.onclick=()=>useCard(b.dataset.card));document.querySelectorAll('[data-use-trap]').forEach(b=>b.onclick=()=>useTrap(b.dataset.useTrap));bindDetails();let rb=document.querySelector('#rollBattle');if(rb)rb.onclick=battleRoll}
 function reset(){logDetails={};logDetailSeq=0;S=fresh();refill();document.querySelector('#log').innerHTML='';log('ゲーム開始：経過ターン0／初期手札4枚／資金5万／戦闘員2体／首領は最下層固定／襲撃カウント4／支給山札には襲撃トリガーカード30枚／襲撃内容は別の襲撃デッキから公開');render()}detailClose.onclick=()=>detailBack.classList.remove('open');detailBack.onclick=e=>{if(e.target===detailBack)detailBack.classList.remove('open')};drawBtn.onclick=startDraw;resolveBtn.onclick=resolveEffects;hireBtn.onclick=hire;document.querySelector('#refreshMarketBtn').onclick=refreshMarketPaid;document.querySelector('#paidDrawBtn').onclick=paidExtraDraw;document.querySelector('#raidAdvanceBtn').onclick=()=>paidRaidAdjust('advance');document.querySelector('#raidDelayBtn').onclick=()=>paidRaidAdjust('delay');endBtn.onclick=endTurn;resetBtn.onclick=reset;reset();
 </script>
@@ -841,6 +841,73 @@ render();
    bindDetails();const rb=document.getElementById('rollBattle');if(rb)rb.onclick=()=>{deadMonster=null;battleRoll()};
  };
  render();
+})();
+</script>
+
+<style>
+#gameEndBack{display:none;position:fixed;inset:0;z-index:100500;background:#000c;align-items:center;justify-content:center;padding:18px}
+#gameEndBack.open{display:flex}
+#gameEndBox{width:min(520px,100%);background:#171a21;border:1px solid #596273;border-radius:16px;padding:20px;text-align:center}
+#gameEndTitle{font-size:34px;font-weight:1000;margin:0 0 8px}
+#gameEndText{color:#d8dde5;margin:0 0 16px;line-height:1.5}
+#gameEndActions{display:grid;grid-template-columns:1fr;gap:9px}
+#gameEndActions button{width:100%;min-height:48px;font-weight:900}
+#gameEndRestart{background:#2f6f4d;border-color:#57946f}
+#gameEndSetup{background:#343b48}
+</style>
+<div id="gameEndBack" role="dialog" aria-modal="true" aria-labelledby="gameEndTitle">
+ <div id="gameEndBox">
+  <div id="gameEndTitle"></div><div id="gameEndText"></div>
+  <div id="gameEndActions"><button id="gameEndRestart" type="button">同じ人数でもう一度</button><button id="gameEndSetup" type="button">人数設定に戻る</button></div>
+ </div>
+</div>
+<script>
+/* Game-end flow: victory/defeat -> restart with same player count or return to setup. */
+(function(){
+ const back=document.getElementById('gameEndBack'), title=document.getElementById('gameEndTitle'), textEl=document.getElementById('gameEndText');
+ const restart=document.getElementById('gameEndRestart'), setup=document.getElementById('gameEndSetup');
+ let ended=false;
+ function playerLabel(){
+   if(typeof MP!=='undefined'&&MP.on&&MP.names&&MP.names.length)return `P${MP.active+1} ${MP.names[MP.active]}`;
+   return 'プレイヤー';
+ }
+ function showEnd(kind){
+   if(ended)return; ended=true;
+   if(typeof saveP==='function'&&typeof MP!=='undefined'&&MP.on)saveP();
+   title.textContent=kind==='win'?'勝利！':'敗北';
+   title.style.color=kind==='win'?'#e5b85f':'#ff8989';
+   textEl.textContent=kind==='win'?`${playerLabel()} の勝利です！`:`${playerLabel()} の首領が倒されました。`;
+   back.classList.add('open');
+ }
+ const oldCheckWin=checkWin;
+ checkWin=function(){
+   oldCheckWin();
+   if(S&&S.vp>=100)showEnd('win');
+ };
+ const oldLogForEnd=log;
+ log=function(t,cls='',detail=null){
+   oldLogForEnd(t,cls,detail);
+   const msg=String(t||'');
+   if(msg.includes('首領まで到達'))showEnd('lose');
+ };
+ function restartSame(){
+   back.classList.remove('open'); ended=false;
+   if(typeof MP!=='undefined'&&MP.on&&MP.players&&MP.players.length){
+     mpCount.value=String(MP.players.length);
+     namesUI();
+     (MP.names||[]).forEach((n,i)=>{const el=document.getElementById('mpn'+i);if(el)el.value=n});
+     mpStart.click();
+   }else{ reset(); }
+ }
+ restart.onclick=restartSame;
+ setup.onclick=()=>{
+   back.classList.remove('open'); ended=false;
+   if(typeof MP!=='undefined'&&MP.players&&MP.players.length)mpCount.value=String(MP.players.length);
+   namesUI();
+   if(typeof MP!=='undefined'&&MP.names)(MP.names||[]).forEach((n,i)=>{const el=document.getElementById('mpn'+i);if(el)el.value=n});
+   mpPass.classList.add('hide');
+   mpSetup.classList.remove('hide');
+ };
 })();
 </script>
 
